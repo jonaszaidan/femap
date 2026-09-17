@@ -1,4 +1,6 @@
+
 import { supabase } from "../src/lib/supabase";
+import MortalidadeChart from "../src/components/MortalidadeChart";
 
 export default async function Home() {
   const { data: indicadores, error } = await supabase
@@ -58,7 +60,25 @@ export default async function Home() {
         <h2 className="text-2xl font-bold mb-4">
           Indicadores Municipais
         </h2>
+         <div className="mt-8">
+        <MortalidadeChart dados={indicadores || []} />
+        </div>
+        <div className="flex gap-6 mt-4 text-sm">
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-green-500 rounded"></div>
+    <span>Baixo risco (&lt; 3)</span>
+  </div>
 
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+    <span>Médio risco (3 a 4.5)</span>
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-red-500 rounded"></div>
+    <span>Alto risco (&gt; 4.5)</span>
+  </div>
+</div>    
         <table className="w-full">
           <thead>
             <tr className="border-b">
@@ -82,6 +102,7 @@ export default async function Home() {
             ))}
           </tbody>
         </table>
+       
       </div>
     </main>
   );
