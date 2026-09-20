@@ -3,11 +3,25 @@ import MortalidadeChart from "../src/components/MortalidadeChart";
 import Header from "../src/components/Header";
 import dynamic from "next/dynamic";
 import MapaMunicipios from "../src/components/MapaMunicipios";
+import MapaHPVUF from "../src/components/MapaHPVUF";
+
 
 export default async function Home() {
+
   const { data: indicadores, error } = await supabase
     .from("indicadores")
     .select("*");
+
+  const {
+    data: hpv,
+    error: hpvError,
+  } = await supabase
+    .from("vacinacao_hpv")
+    .select("*")
+    .eq("faixa_etaria", "9-14");
+    console.log(hpv?.[0]);
+
+ 
 
   return (
     <main className="min-h-screen bg-slate-100 p-8">
@@ -103,13 +117,12 @@ export default async function Home() {
       <MapaMunicipios
         titulo="Mortalidade"
         dados={indicadores || []}
+        metrica="mortalidade"
       />
 
-      <MapaMunicipios
-        titulo="Cobertura HPV"
-        dados={indicadores || []}
+     <MapaHPVUF
+   dados={hpv || []}
       />
-
 
 
 </div>
