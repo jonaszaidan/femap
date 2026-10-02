@@ -1,88 +1,66 @@
 import { supabase } from "../src/lib/supabase";
+import Header from "../src/components/Header";
+import DashboardClient from "../src/components/Dashboard_Mortalidade_CCu";
 
 export default async function Home() {
-  const { data: indicadores, error } = await supabase
+  // Indicadores municipais (se tiver mais de 1000 linhas, coloque .limit(10000))
+  const {
+    data: indicadores,
+    error: indicadoresError,
+  } = await supabase
     .from("indicadores")
-    .select("*");
+    .select("*")
+    .limit(10000);
 
-  return (
-    <main className="min-h-screen bg-slate-100 p-8">
-      <h1 className="text-4xl font-bold mb-6">
-        FeMap
-      </h1>
+  // Vacinação HPV
+  const {
+    data: hpv,
+    error: hpvError,
+  } = await supabase
+    .from("vacinacao_hpv")
+    .select("*")
+    .limit(10000);
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">
-            Municípios
-          </h2>
+  // Mortalidade CCU:
+  // Buscamos apenas os registros consolidados de "Total dos Municípios" para todos os anos.
+  // Isso traz exatamente as linhas que o KPI precisa (2020 a 2024) sem estourar o limite de 1000!
+  const {
+    data: mortalidadeCCU,
+    error: mortalidadeError,
+  } = await supabase
+    .from("tx_mortalidade_ccu")
+    .select("*")
+    .ilike("municipio", "%total%");
 
-          <p className="text-3xl font-bold">
-            {indicadores?.length || 0}
-          </p>
-        </div>
+  const erro =
+    indicadoresError ||
+    hpvError ||
+    mortalidadeError;
 
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">
-            Média Vacinação HPV
-          </h2>
 
-          <p className="text-3xl font-bold text-green-600">
-            {Math.round(
-              (indicadores?.reduce(
-                (acc, item) => acc + Number(item.vacinacao_hpv),
-                0
-              ) || 0) / (indicadores?.length || 1)
-            )}
-            %
-          </p>
-        </div>
+const {
+  data: mortalidadeUF,
+} = await supabase
+  .from("tx_mortalidade_ccu_uf")
+  .select("*");    
 
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">
-            Média Mortalidade
-          </h2>
+ return (
+  <main className="min-h-screen bg-slate-100 p-8">
+    <Header />
 
-          <p className="text-3xl font-bold text-red-600">
-            {(
-              (indicadores?.reduce(
-                (acc, item) => acc + Number(item.mortalidade),
-                0
-              ) || 0) / (indicadores?.length || 1)
-            ).toFixed(1)}
-          </p>
-        </div>
+    {erro && (
+      <div className="bg-red-100 text-red-700 p-4 rounded mb-6">
+        Erro ao carregar os dados: {erro.message}
       </div>
+    )}
 
-      <div className="bg-white rounded-xl p-6 shadow">
-        <h2 className="text-2xl font-bold mb-4">
-          Indicadores Municipais
-        </h2>
+    <DashboardClient
+      indicadores={indicadores || []}
+      hpv={hpv || []}
+      mortalidadeCCU={mortalidadeCCU || []}
+      mortalidadeUF={mortalidadeUF || []}
+    />
 
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-2">Município</th>
-              <th className="text-left p-2">Estado</th>
-              <th className="text-left p-2">Mortalidade</th>
-              <th className="text-left p-2">HPV (%)</th>
-              <th className="text-left p-2">Rastreamento (%)</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {indicadores?.map((item) => (
-              <tr key={item.id} className="border-b">
-                <td className="p-2">{item.municipio}</td>
-                <td className="p-2">{item.estado}</td>
-                <td className="p-2">{item.mortalidade}</td>
-                <td className="p-2">{item.vacinacao_hpv}</td>
-                <td className="p-2">{item.rastreamento}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  );
+  </main>
+);
 }

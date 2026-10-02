@@ -1,0 +1,8 @@
+# GeoJSON gigante
+*.geojson
+
+# ETL
+etl/output/*.csv
+
+# Arquivos temporários
+etl/input/*.csv
