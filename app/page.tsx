@@ -3,30 +3,26 @@ import Header from "../src/components/Header";
 import DashboardClient from "../src/components/Dashboard_Mortalidade_CCU";
 
 export default async function Home() {
-  const {
-    data: indicadores,
-    error: indicadoresError,
-  } = await supabase
-    .from("indicadores")
-    .select("*")
-    .limit(10000);
 
+  // KPI Nacional
   const {
-    data: hpv,
-    error: hpvError,
-  } = await supabase
-    .from("vacinacao_hpv")
-    .select("*")
-    .limit(10000);
-
-  const {
-    data: mortalidadeCCU,
-    error: mortalidadeError,
+    data: taxaMortalidadeCCU,
+    error: taxaMortalidadeError,
   } = await supabase
     .from("tx_mortalidade_ccu")
     .select("*")
     .ilike("municipio", "%total%");
 
+  // Municípios (Top 10 / Tabelas)
+  const {
+    data: mortalidadeMunicipios,
+    error: mortalidadeMunicipiosError,
+  } = await supabase
+    .from("tx_mortalidade_ccu")
+    .select("*")
+    .limit(100000);
+
+  // Estados (Mapa)
   const {
     data: mortalidadeUF,
     error: mortalidadeUFError,
@@ -35,9 +31,8 @@ export default async function Home() {
     .select("*");
 
   const erro =
-    indicadoresError ||
-    hpvError ||
-    mortalidadeError ||
+    taxaMortalidadeError ||
+    mortalidadeMunicipiosError ||
     mortalidadeUFError;
 
   return (
@@ -52,9 +47,8 @@ export default async function Home() {
       )}
 
       <DashboardClient
-        indicadores={indicadores || []}
-        hpv={hpv || []}
-        mortalidadeCCU={mortalidadeCCU || []}
+        mortalidadeCCU={taxaMortalidadeCCU || []}
+        mortalidadeMunicipios={mortalidadeMunicipios || []}
         mortalidadeUF={mortalidadeUF || []}
       />
 

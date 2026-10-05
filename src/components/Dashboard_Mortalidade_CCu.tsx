@@ -1,28 +1,21 @@
 "use client";
 
-
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import TabelaTop10Municipios from "./Graficos/TabelaTop10Municipios";
+import KpiCards from "./Graficos/KpiCards";
 
+// Importação dinâmica do mapa (desabilitando SSR)
 const MapaMortalidadeUF = dynamic(
-  () => import("./MapaMortalidadeUF"),
-  {
-    ssr: false,
-  }
+  () => import("./Graficos/MapaMortalidadeUF"),
+  { ssr: false }
 );
 
-
-interface HPV {
-  id?: number;
-  uf: string;
-  municipio?: string;
-  sexo?: string;
-  ano?: number;
-  faixa_etaria: string;
-  cobertura: number;
-  doses?: number;
-  populacao?: number;
-}
+// Importação dinâmica do gráfico de evolução (desabilitando SSR)
+const EvolucaoAbsolutaChart = dynamic(
+  () => import("./Graficos/EvolucaoMortalidade_CCU"),
+  { ssr: false }
+);
 
 interface MortalidadeCCU {
   id?: number;
@@ -30,24 +23,6 @@ interface MortalidadeCCU {
   ano: number;
   tx_mortalidade: number;
   codigo_ibge?: string;
-}
-interface Indicador {
-  id: number;
-  municipio: string;
-  estado: string;
-  ano?: number;
-  mortalidade: number;
-  vacinacao_hpv: number;
-  rastreamento: number;
-  latitude: number;
-  longitude: number;
-}
-
-interface DashboardProps {
-  indicadores?: Indicador[];
-  hpv?: HPV[];
-  mortalidadeCCU?: MortalidadeCCU[];
-  mortalidadeUF?: MortalidadeUF[];
 }
 
 interface MortalidadeUF {
@@ -57,102 +32,94 @@ interface MortalidadeUF {
   tx_mortalidade_ccu: number;
 }
 
+interface DashboardProps {
+  mortalidadeCCU?: MortalidadeCCU[];
+  mortalidadeMunicipios?: MortalidadeCCU[];
+  mortalidadeUF?: MortalidadeUF[];
+}
 
 export default function Dashboard({
-  indicadores = [],
-  hpv = [],
   mortalidadeCCU = [],
+  mortalidadeMunicipios = [],
   mortalidadeUF = [],
 }: DashboardProps) {
+
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
 
-  // 1. Filtra registros do ano selecionado
-  const mortalidadeAno = (mortalidadeCCU || []).filter(
-    (item) => Number(item?.ano) === Number(anoSelecionado)
+  const mortalidadeAno = mortalidadeCCU.filter(
+    (item) => Number(item.ano) === Number(anoSelecionado)
   );
 
-  // 2. Busca a linha de total ignorando acentos e maiúsculas
   const totalMunicipios = mortalidadeAno.find((item) => {
-    if (!item?.municipio) return false;
+    if (!item.municipio) return false;
+
     const nomeLimpo = item.municipio
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .trim()
       .toLowerCase();
 
-    return nomeLimpo.includes("total") && nomeLimpo.includes("municipio");
+    return (
+      nomeLimpo.includes("total") &&
+      nomeLimpo.includes("municipio")
+    );
   });
-console.log("Exemplo de item do banco:", mortalidadeCCU[0]);
-  console.log("1. Array original mortalidadeCCU:", mortalidadeCCU);
-console.log("2. Ano Selecionado:", anoSelecionado);
-console.log("3. Array filtrado mortalidadeAno:", mortalidadeAno);
-console.log("4. totalMunicipios:", totalMunicipios);
+
   const taxaMortalidadeCCU =
     totalMunicipios?.tx_mortalidade != null
       ? Number(totalMunicipios.tx_mortalidade).toFixed(2)
       : "0.00";
 
-  // 3. Filtro HPV seguro
-  const hpvAno = (hpv || []).filter((item) => {
-    const faixaCorreta = item?.faixa_etaria === "9-14";
-    if (item?.ano !== undefined && item?.ano !== null) {
-      return faixaCorreta && Number(item.ano) === Number(anoSelecionado);
-    }
-    return faixaCorreta;
-  });
-
-  // 4. Filtro Indicadores seguro
-  const indicadoresAno = (indicadores || []).filter((item) => {
-    if (item?.ano !== undefined && item?.ano !== null) {
-      return Number(item.ano) === Number(anoSelecionado);
-    }
-    return true;
-  });
-
-  // 5. Média da mortalidade municipal
-  const mediaMortalidade =
-    indicadoresAno.length > 0
-      ? (
-          indicadoresAno.reduce(
-            (acc, item) => acc + Number(item.mortalidade || 0),
-            0
-          ) / indicadoresAno.length
-        ).toFixed(1)
-      : "0.0";
-    // 6. Mapa por Municipio (em construção)    
-  
-
-
-
-const mortalidadeUFAno =
-  (mortalidadeUF || []).filter(
-    (item: MortalidadeUF) =>
-      Number(item.ano) === Number(anoSelecionado)
+  const mortalidadeMunicipiosAno = mortalidadeMunicipios.filter(
+    (item) =>
+      Number(item.ano) === Number(anoSelecionado) &&
+      !item.municipio.toLowerCase().includes("total")
   );
 
+  const mediaMortalidade =
+    mortalidadeMunicipiosAno.length > 0
+      ? (
+          mortalidadeMunicipiosAno.reduce(
+            (acc, item) => acc + Number(item.tx_mortalidade),
+            0
+          ) / mortalidadeMunicipiosAno.length
+        ).toFixed(1)
+      : "0.0";
 
+  {/* Calculo da tabela de top municipios */}
+  const top10Municipios = [...mortalidadeMunicipiosAno]
+    .sort((a, b) => Number(b.tx_mortalidade) - Number(a.tx_mortalidade))
+    .slice(0, 10);
 
+  {/* Calculo do KPI 3 */}
+  const municipioPiorTaxa =
+    top10Municipios.length > 0 ? top10Municipios[0] : null;
 
+  const mortalidadeUFAno = mortalidadeUF.filter(
+    (item) => Number(item.ano) === Number(anoSelecionado)
+  );
 
-  return (
+  // 🟢 ITEM 2: DADOS DO GRÁFICO
+  const dadosEvolucao = [
+    { ano: "2021", mortalidade: 4.3, incidencia: 2.4, hsil: 2.0 },
+    { ano: "2022", mortalidade: 2.5, incidencia: 4.4, hsil: 2.0 },
+    { ano: "2023", mortalidade: 3.5, incidencia: 1.8, hsil: 3.0 },
+    { ano: "2024", mortalidade: 4.5, incidencia: 2.8, hsil: 5.0 },
+  ];
+
+ return (
     <>
-      {/* FILTRO GLOBAL DE ANO */}
+      {/* 1. FILTRO GLOBAL DE ANO */}
       <div className="bg-white rounded-xl shadow p-4 mb-6">
         <div className="flex items-center gap-4">
-          <label
-            htmlFor="ano"
-            className="text-sm font-semibold text-slate-600"
-          >
+          <label htmlFor="ano" className="text-sm font-semibold text-slate-600">
             Ano de referência
           </label>
-
           <select
             id="ano"
             value={anoSelecionado}
-            onChange={(event) =>
-              setAnoSelecionado(Number(event.target.value))
-            }
-            className="border border-slate-300 rounded-lg px-4 py-2 bg-white text-slate-700 font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(event) => setAnoSelecionado(Number(event.target.value))}
+            className="border border-slate-300 rounded-lg px-4 py-2 bg-white"
           >
             <option value={2020}>2020</option>
             <option value={2021}>2021</option>
@@ -163,61 +130,66 @@ const mortalidadeUFAno =
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {/* KPI 1 */}
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">Tx. Mortalidade CCU</h2>
-          <p className="text-4xl font-bold text-red-600 mt-1">
-            {taxaMortalidadeCCU}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            média das taxas municipais
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Ano {anoSelecionado}
-          </p>
+    {/* 2. CARDS DE KPI */}
+      
+       
+        <KpiCards taxaMortalidadeCCU={taxaMortalidadeCCU} />
+      
+
+      {/* 3. GRÁFICO DE EVOLUÇÃO */}
+      <div className="mb-8">
+        <EvolucaoAbsolutaChart data={dadosEvolucao} />
+      </div>
+
+      {/* 4. SEÇÃO TAXAS POR ESTADO (3 MAPAS NO TOPO) */}
+      <div className="mb-8">
+        <div className="bg-slate-400 text-white rounded-xl px-6 py-3 mb-6 flex justify-between items-center font-bold text-lg">
+          <h2>Taxas por estado</h2>
+          <span className="text-sm font-normal">Ano de referência: {anoSelecionado}</span>
         </div>
 
-        {/* KPI 2 */}
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">Taxa de Mortalidade CCU</h2>
-          <p className="text-4xl font-bold text-red-600 mt-1">
-            {taxaMortalidadeCCU}
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            por 100.000 mulheres
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Ano {anoSelecionado}
-          </p>
-        </div>
+        {/* Grid de 3 Mapas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Mapa 1: Mortalidade (Tema Roxo/Rosa) */}
+          <div className="bg-purple-50/50 p-4 rounded-3xl border border-purple-100 shadow-sm">
+            <h3 className="text-center font-bold text-purple-900 mb-2">Mortalidade</h3>
+            <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno} tema="purple" />
+          </div>
 
-        {/* KPI 3 */}
-        <div className="bg-white rounded-xl p-6 shadow">
-          <h2 className="text-gray-500">Média Mortalidade</h2>
-          <p className="text-4xl font-bold text-red-600 mt-1">
-            {mediaMortalidade}
-          </p>
-          <p className="text-xs text-gray-400 mt-2">
-            Ano {anoSelecionado}
-          </p>
+          {/* Mapa 2: Incidência (Tema Laranja) */}
+          <div className="bg-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
+            <h3 className="text-center font-bold text-amber-900 mb-2">Incidência</h3>
+            <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno} tema="orange" />
+          </div>
+
+          {/* Mapa 3: HSIL (Tema Verde) */}
+          <div className="bg-emerald-50/50 p-4 rounded-3xl border border-emerald-100 shadow-sm">
+            <h3 className="text-center font-bold text-emerald-900 mb-2">HSIL</h3>
+            <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno} tema="green" />
+          </div>
         </div>
       </div>
 
-    <h3 className="text-xl font-semibold mb-4">
-  Mortalidade por Estado
-</h3>
+      {/* 5. SEÇÃO DAS 3 TABELAS (EMBAIXO DOS MAPAS) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <TabelaTop10Municipios
+          titulo="Top 10 Municípios - Maior Mortalidade"
+          dados={top10Municipios}
+          corTextoTaxa="text-pink-600"
+        />
 
-<p className="text-sm text-gray-500 mb-4">
-  Taxa de mortalidade por câncer do colo do útero por 100.000 mulheres
-</p>
+        <TabelaTop10Municipios
+          titulo="Top 10 Municípios - Maior Incidência"
+          dados={top10Municipios} /* Ajuste para a variável de incidência quando tiver */
+          corTextoTaxa="text-amber-600"
+        />
 
-  {/* MAPA UF */}
-<MapaMortalidadeUF
-  mortalidadeUFAno={mortalidadeUFAno}
-/>
-
+        <TabelaTop10Municipios
+          titulo="Top 10 Municípios - Maior HSIL"
+          dados={top10Municipios} /* Ajuste para a variável de HSIL quando tiver */
+          corTextoTaxa="text-emerald-600"
+        />
+      </div>
     </>
   );
 }
