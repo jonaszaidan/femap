@@ -9,17 +9,16 @@ if (isGithubActions) {
   }
 }
 
-const assetPrefix = repo ? `/${repo}/` : '';
 const basePath = repo ? `/${repo}` : '';
 
 const nextConfig = {
   output: 'export',
-  trailingSlash: true, // 👈 ADICIONE ESTA LINHA (Gera diretórios com index.html para o GitHub Pages)
+  trailingSlash: true,
   basePath: basePath,
-  assetPrefix: assetPrefix,
+  assetPrefix: basePath ? `${basePath}/` : '',
   images: {
     unoptimized: true,
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
