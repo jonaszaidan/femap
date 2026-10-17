@@ -18,7 +18,11 @@ export const metadata: Metadata = {
     "Femap helps teams surface market signals, align strategy, and act with confidence using a live map of growth opportunities.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
       lang="en"
