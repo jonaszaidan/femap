@@ -10,6 +10,7 @@ export interface ColetaPapaNicolauUF {
   estado?: string;
   ano?: number;
   media_tx_coleta_uf?: number;
+  taxa?: number;
 }
 
 interface Props {
@@ -22,28 +23,50 @@ export default function MapaColetaPapaNicolauUF({
   const [geojson, setGeojson] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/mapas/brasil-estados.geojson")
-      .then((res) => res.json())
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+    fetch(`${basePath}/mapas/brasil-estados.geojson`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao carregar GeoJSON de Estados para Papanicolau");
+        return res.json();
+      })
       .then((data) => {
         setGeojson(data);
+      })
+      .catch((err) => {
+        console.error("Erro no mapa Papanicolau UF:", err);
       });
   }, []);
 
   // Faixas ajustadas para a Taxa de Coleta de Papanicolau
   const getCor = (valor: number) => {
-    if (valor <= 0) return "rgb(241, 245, 249)";  // Sem dados / Zero
+    if (!valor || valor <= 0) return "rgb(241, 245, 249)";  // Sem dados / Zero
     if (valor < 15.0) return "rgb(192, 0, 0)"; // Nível 1: Muito Baixa (< 15.0%)
     if (valor < 18.0) return "rgb(237, 125, 49)"; // Nível 2: Baixa (15.0% - 18.0%)
     if (valor < 21.0) return "rgb(255, 192, 0)"; // Nível 3: Média (18.0% - 21.0%)
     if (valor < 25.0) return "rgb(0, 176, 80)";   // Nível 4: Alta (21.0% - 25.0%)
-    return "rgb(0, 125, 50)";                     // Nível 5: Muito Alta (> 25.0%)
+    return "rgb(0, 125, 50)";                    // Nível 5: Muito Alta (> 25.0%)
   };
 
   // Garante que listaDados é sempre um Array válido
   const listaDados = Array.isArray(coletaUFAno) ? coletaUFAno : [];
 
+  // Extrai a sigla da UF independente de como ela vem nomeada no GeoJSON
+  const getSiglaFromFeature = (feature: any): string => {
+    const props = feature.properties || {};
+    const siglaRaw = props.SIGLA || props.sigla || props.uf || props.UF || props.id || "";
+    return String(siglaRaw).trim().toUpperCase();
+  };
+
+  // Encontra a UF na lista de dados recebida via Props
+  const encontrarEstado = (siglaGeo: string) => {
+    return listaDados.find((item) => {
+      const ufBanco = String(item.uf || item.estado || "").trim().toUpperCase();
+      return ufBanco === siglaGeo;
+    });
+  };
+
   return (
-    <div className="relative h-[500px] rounded-lg overflow-hidden border">
+    <div className="relative h-[500px] rounded-lg overflow-hidden border border-slate-100 shadow-sm">
       <MapContainer
         center={[-15, -55]}
         zoom={4}
@@ -60,52 +83,52 @@ export default function MapaColetaPapaNicolauUF({
       >
         {geojson && (
           <GeoJSON
+            key={JSON.stringify(listaDados.length)}
             data={geojson}
             style={(feature: any) => {
-              const uf = feature.properties.SIGLA;
-              const estado = listaDados.find((item) => item.uf === uf);
-              const valor = estado?.media_tx_coleta_uf || 0;
+              const siglaGeo = getSiglaFromFeature(feature);
+              const estado = encontrarEstado(siglaGeo);
+              
+              const valor = Number(
+                estado?.media_tx_coleta_uf ?? estado?.taxa ?? 0
+              );
 
               return {
                 fillColor: getCor(valor),
                 fillOpacity: 0.85,
                 weight: 1,
-                color: "#f8fafc",
+                color: "#ffffff",
               };
             }}
             onEachFeature={(feature: any, layer: any) => {
-              const uf = feature.properties.SIGLA;
-              const estado = listaDados.find((item) => item.uf === uf);
+              const siglaGeo = getSiglaFromFeature(feature);
+              const estado = encontrarEstado(siglaGeo);
 
-              if (!estado) return;
+              const valor = Number(
+                estado?.media_tx_coleta_uf ?? estado?.taxa ?? 0
+              );
 
-              const valor = estado.media_tx_coleta_uf || 0;
-              let classificacao = "";
+              let classificacao = "Muito Baixa";
+              if (valor >= 25.0) classificacao = "Muito Alta";
+              else if (valor >= 21.0) classificacao = "Alta";
+              else if (valor >= 18.0) classificacao = "Média";
+              else if (valor >= 15.0) classificacao = "Baixa";
 
-              if (valor < 15.0) {
-                classificacao = "Muito Baixa";
-              } else if (valor < 18.0) {
-                classificacao = "Baixa";
-              } else if (valor < 21.0) {
-                classificacao = "Média";
-              } else if (valor < 25.0) {
-                classificacao = "Alta";
-              } else {
-                classificacao = "Muito Alta";
-              }
+              const nomeEstado = feature.properties?.NM_ESTADO || feature.properties?.name || estado?.estado || estado?.uf || siglaGeo;
 
               layer.bindPopup(`
-                <div style="min-width:180px">
-                  <strong>${estado.estado || estado.uf}</strong>
+                <div style="min-width:180px; font-family: sans-serif;">
+                  <strong style="font-size:14px;">${nomeEstado}</strong>
                   <br/>
-                  UF: ${estado.uf}
+                  <span style="font-size:11px; color:#64748b;">UF: ${siglaGeo}</span>
                   <br/><br/>
                   Taxa Média de Coleta:
-                  <strong>
-                    ${Number(valor).toFixed(2)}%
+                  <br/>
+                  <strong style="font-size:15px; color:#007d32;">
+                    ${valor > 0 ? valor.toFixed(2) + "%" : "Sem dados"}
                   </strong>
                   <br/><br/>
-                  📊 <strong>${classificacao}</strong>
+                  📊 <strong>${valor > 0 ? classificacao : "Sem classificação"}</strong>
                 </div>
               `);
             }}
@@ -114,8 +137,12 @@ export default function MapaColetaPapaNicolauUF({
       </MapContainer>
 
       {/* Legenda Posicionada à Esquerda */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 rounded-md shadow-md text-xs space-y-1">
+      <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 rounded-md shadow-md text-xs space-y-1 border border-slate-100">
         <div className="font-semibold text-gray-700 mb-1">Taxa de Coleta (%)</div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "rgb(241, 245, 249)" }}></span>
+          <span>Sem dados / Zero</span>
+        </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(192, 0, 0)" }}></span>
           <span>Muito Baixa (&lt; 15,0%)</span>

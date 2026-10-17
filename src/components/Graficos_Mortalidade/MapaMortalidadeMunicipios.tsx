@@ -54,7 +54,8 @@ export default function MapaMortalidadeMunicipios({
     setErro("");
     setGeojson(null);
 
-    const caminhoArquivo = `/mapas/municipios/geojs-${codigoUfIbge}-mun.json`;
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+    const caminhoArquivo = `${basePath}/mapas/municipios/geojs-${codigoUfIbge}-mun.json`;
 
     fetch(caminhoArquivo)
       .then((res) => {

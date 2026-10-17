@@ -1,17 +1,13 @@
-//import type { NextConfig } from "next";
-
-//const nextConfig: NextConfig = {
-  /* config options here */
-//};
-
-//export default nextConfig;
-
-
 import type { NextConfig } from "next";
 
+const isGithubActions = process.env.GITHUB_ACTIONS === "true";
+
 const nextConfig: NextConfig = {
-  output: "export",       // gera HTML estático na pasta /out
-  basePath: "/femap",     // seu site fica em /femap/, não na raiz
+  // Ativa a exportação estática e o basePath apenas no GitHub Actions
+  ...(isGithubActions && {
+    output: "export",
+    basePath: "/femap",
+  }),
   images: { unoptimized: true },
   trailingSlash: true,
 };
