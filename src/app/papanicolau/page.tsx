@@ -2,7 +2,6 @@ import Header from "../../components/Header";
 import NavTabs from "../../components/NavTabs";
 import DashboardPapanicolau from "../../components/Dashboard_PapaNicolau";
 
-export const revalidate = 0;
 
 export default function PapanicolauPage() {
   return (

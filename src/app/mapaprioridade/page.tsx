@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import NavTabs from "../../components/NavTabs";
 import DashboardMapaPrioridade from "../../components/Dashboard_MapaPrioridade";
 
-export const revalidate = 0;
+
 
 export default function MapaPrioridadePage() {
   return (
