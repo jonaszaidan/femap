@@ -7,7 +7,7 @@ interface KpiPapSmearProps {
   totalExames?: string;
 }
 
-export default function Kpi_Pap_Smear({
+export default function Kpis_PapaNicolau({
   taxaSisab = "35%",
   taxaCalculada = "60%",
   populacaoAlvo = "8.000",
@@ -15,6 +15,7 @@ export default function Kpi_Pap_Smear({
 }: KpiPapSmearProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
+      {/* Card 1: Taxa de Cobertura SISAB */}
       <div className="bg-white p-5 rounded-xl shadow-sm text-center flex flex-col justify-center border border-slate-100">
         <span className="text-sm font-bold text-slate-700 mb-2 leading-tight">
           Taxa de cobertura SISAB
@@ -24,6 +25,7 @@ export default function Kpi_Pap_Smear({
         </span>
       </div>
 
+      {/* Card 2: Taxa de Cobertura Calculada */}
       <div className="bg-white p-5 rounded-xl shadow-sm text-center flex flex-col justify-center border border-slate-100">
         <span className="text-sm font-bold text-slate-700 mb-2 leading-tight">
           Taxa de cobertura calculada
@@ -33,6 +35,7 @@ export default function Kpi_Pap_Smear({
         </span>
       </div>
 
+      {/* Card 3: População Alvo Total */}
       <div className="bg-white p-5 rounded-xl shadow-sm text-center flex flex-col justify-center border border-slate-100">
         <span className="text-sm font-bold text-slate-700 mb-2 leading-tight">
           População alvo total
@@ -42,6 +45,7 @@ export default function Kpi_Pap_Smear({
         </span>
       </div>
 
+      {/* Card 4: Total de Exames */}
       <div className="bg-white p-5 rounded-xl shadow-sm text-center flex flex-col justify-center border border-slate-100">
         <span className="text-sm font-bold text-slate-700 mb-2 leading-tight">
           Total de exames

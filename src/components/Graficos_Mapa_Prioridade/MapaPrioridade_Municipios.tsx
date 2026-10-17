@@ -33,11 +33,11 @@ function normalizarTexto(texto: string = "") {
 }
 
 function getColor(taxa: number) {
-  if (taxa > 15) return "#4a044e"; // Roxo muito escuro (Prioridade Máxima)
-  if (taxa > 10) return "#7e22ce";
-  if (taxa > 5)  return "#a855f7";
-  if (taxa > 0)  return "#c084fc";
-  return "#f3e8ff";                // Sem dados / Taxa 0.00
+  if (taxa > 15) return "#C00000"; // Roxo muito escuro (Prioridade Máxima)
+  if (taxa > 10) return "#ED7D31";
+  if (taxa > 5)  return "#FFC000";
+  if (taxa > 0)  return "#00B050";
+  return "#aaadab";                // Sem dados / Taxa 0.00
 }
 
 export default function MapaPrioridade_Municipios({

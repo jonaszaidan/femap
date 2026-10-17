@@ -1,26 +1,23 @@
 "use client";
 
-import {
-  MapContainer,
-  GeoJSON,
-} from "react-leaflet";
-
+import { MapContainer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
+// Aceita propriedades opcionais para bater com a interface do Dashboard
 interface MortalidadeUF {
   uf: string;
-  estado: string;
-  ano: number;
-  tx_mortalidade_ccu: number;
+  estado?: string;
+  ano?: number;
+  tx_mortalidade_ccu?: number;
 }
 
 interface Props {
-  mortalidadeUFAno: MortalidadeUF[];
+  mortalidadeUFAno?: MortalidadeUF[];
 }
 
 export default function MapaMortalidadeUF({
-  mortalidadeUFAno,
+  mortalidadeUFAno = [],
 }: Props) {
   const [geojson, setGeojson] = useState<any>(null);
 
@@ -35,10 +32,13 @@ export default function MapaMortalidadeUF({
   const getCor = (valor: number) => {
     if (valor < 3.0) return "rgb(247, 244, 249)"; // Nível 1: Muito Baixa (< 3.0)
     if (valor < 5.0) return "rgb(235, 160, 180)"; // Nível 2: Baixa (< 5.0)
-    if (valor < 8.0) return "rgb(209, 76, 108)"; // Nível 3: Média (< 8.0)
-    if (valor <10.0) return "rgb(140, 0, 42)";  // Nível 4: Alta (< 10.0)
-    return "rgb(103, 0, 31)";                   // Nível 5: Muito Alta (> 10.0)
+    if (valor < 8.0) return "rgb(209, 76, 108)";  // Nível 3: Média (< 8.0)
+    if (valor < 10.0) return "rgb(140, 0, 42)";  // Nível 4: Alta (< 10.0)
+    return "rgb(103, 0, 31)";                    // Nível 5: Muito Alta (> 10.0)
   };
+
+  // Garante que listaDados é sempre um Array válido
+  const listaDados = Array.isArray(mortalidadeUFAno) ? mortalidadeUFAno : [];
 
   return (
     <div className="relative h-[500px] rounded-lg overflow-hidden border">
@@ -61,9 +61,7 @@ export default function MapaMortalidadeUF({
             data={geojson}
             style={(feature: any) => {
               const uf = feature.properties.SIGLA;
-              const estado = mortalidadeUFAno.find(
-                (item) => item.uf === uf
-              );
+              const estado = listaDados.find((item) => item.uf === uf);
               const valor = estado?.tx_mortalidade_ccu || 0;
 
               return {
@@ -75,14 +73,12 @@ export default function MapaMortalidadeUF({
             }}
             onEachFeature={(feature: any, layer: any) => {
               const uf = feature.properties.SIGLA;
-              const estado = mortalidadeUFAno.find(
-                (item) => item.uf === uf
-              );
+              const estado = listaDados.find((item) => item.uf === uf);
 
               if (!estado) return;
 
               let classificacao = "";
-              const valor = estado.tx_mortalidade_ccu;
+              const valor = estado.tx_mortalidade_ccu || 0;
 
               if (valor < 3.0) {
                 classificacao = "Muito Baixa";
@@ -98,7 +94,7 @@ export default function MapaMortalidadeUF({
 
               layer.bindPopup(`
                 <div style="min-width:180px">
-                  <strong>${estado.estado}</strong>
+                  <strong>${estado.estado || estado.uf}</strong>
                   <br/>
                   UF: ${estado.uf}
                   <br/><br/>
@@ -117,7 +113,7 @@ export default function MapaMortalidadeUF({
         )}
       </MapContainer>
 
-      {/* Legenda Posicionada à Esquerda e Reduzida */}
+      {/* Legenda Posicionada à Esquerda */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 rounded-md shadow-md text-xs space-y-1">
         <div className="font-semibold text-gray-700 mb-1">Mortalidade (por 100 mil)</div>
         <div className="flex items-center gap-1.5">
