@@ -65,7 +65,7 @@ export default function Evolucao_Vacinacao({
               />
               <YAxis hide domain={[0, 100]} />
               <Tooltip
-                formatter={(value: number) => [`${value}%`, "Cobertura"]}
+                formatter={(value: any) => [`${value}%`, "Cobertura"]}
                 contentStyle={{
                   backgroundColor: "#fff",
                   borderRadius: "8px",
@@ -76,7 +76,7 @@ export default function Evolucao_Vacinacao({
               <Line
                 type="monotone"
                 dataKey="cobertura"
-                stroke="#581c87" // Roxo escuro do seu layout
+                stroke="#581c87"
                 strokeWidth={3}
                 dot={false}
               >
