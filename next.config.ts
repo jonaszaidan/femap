@@ -1,4 +1,5 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from 'next';
+
 const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
 let repo = '';
@@ -11,11 +12,10 @@ if (isGithubActions) {
 
 const basePath = repo ? `/${repo}` : '';
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
   basePath: basePath,
-  assetPrefix: basePath ? `${basePath}/` : '',
   images: {
     unoptimized: true,
   },
