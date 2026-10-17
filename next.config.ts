@@ -1,15 +1,25 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
-const isGithubActions = process.env.GITHUB_ACTIONS === "true";
+let repo = '';
+if (isGithubActions) {
+  const gitHubRepo = process.env.GITHUB_REPOSITORY;
+  if (gitHubRepo) {
+    repo = gitHubRepo.split('/')[1];
+  }
+}
 
-const nextConfig: NextConfig = {
-  // Ativa a exportação estática e o basePath apenas no GitHub Actions
-  ...(isGithubActions && {
-    output: "export",
-    basePath: "/femap",
-  }),
-  images: { unoptimized: true },
-  trailingSlash: true,
+const assetPrefix = repo ? `/${repo}/` : '';
+const basePath = repo ? `/${repo}` : '';
+
+const nextConfig = {
+  output: 'export',
+  trailingSlash: true, // 👈 ADICIONE ESTA LINHA (Gera diretórios com index.html para o GitHub Pages)
+  basePath: basePath,
+  assetPrefix: assetPrefix,
+  images: {
+    unoptimized: true,
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
