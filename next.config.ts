@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   basePath: basePath,
   assetPrefix: basePath ? `${basePath}/` : '',
+  // Expõe o basePath para o código que roda no navegador (fetch de /mapas/..., etc.)
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   images: {
     unoptimized: true,
   },
