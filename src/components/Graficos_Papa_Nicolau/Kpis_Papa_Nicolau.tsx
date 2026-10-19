@@ -8,10 +8,10 @@ interface KpiPapSmearProps {
 }
 
 export default function Kpis_PapaNicolau({
-  taxaSisab = "35%",
-  taxaCalculada = "60%",
-  populacaoAlvo = "8.000",
-  totalExames = "5.000",
+  taxaSisab = "0%",
+  taxaCalculada = "0%",
+  populacaoAlvo = "0",
+  totalExames = "0",
 }: KpiPapSmearProps) {
   return (
     <div className="grid grid-cols-2 gap-4">

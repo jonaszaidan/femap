@@ -4,6 +4,7 @@ import { MapContainer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
+
 // Interface ajustada para aceitar dados vindos do Dashboard (propriedades opcionais)
 interface HsilUF {
   uf: string;

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Kpi_Pap_Smear from "./Graficos_Papa_Nicolau/Kpis_Papa_Nicolau";
-import Alvo_Faixa_Etaria from "./Graficos_Papa_Nicolau/Alvo_Faixa_Etaria";
+import Alvo_Faixa_Etaria from "./Graficos_Papa_Nicolau/Populacao_Faixa_Etaria";
 import DynamicMapaPrevencao from "./Graficos_Papa_Nicolau/DynamicMapaPapaNicolau";
 import Evolucao_Vacinacao, { EvolucaoColetaItem } from "./Graficos_Papa_Nicolau/Evolucao_Coleta_PapaNicolau";
 import Tabela_Cobertura_Rastreamento from "./Graficos_Papa_Nicolau/Tabela_Cobertura_Rastreamento";

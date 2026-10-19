@@ -65,4 +65,31 @@ export async function getTotalTaxaSisabPapaNicolau(ano, estado = 'Total_UF') {
   }
 
   return null;
+} 
+
+
+// CONSULTA POPULAÇÃO ALVO TOTAL
+export async function getPopulacaoAlvoTotal(estado = 'Brasil') {
+  let query = supabase
+    .from('populacao_alvo_uf')
+    .select('pessoas')
+    .eq('estado', estado);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Erro ao buscar população alvo total:', error);
+    return null;
+  }
+
+  if (data && data.length > 0) {
+    // Sumariza a quantidade de pessoas para o estado selecionado
+    const totalPessoas = data.reduce((acc, item) => acc + Number(item.pessoas || 0), 0);
+
+    return {
+      populacao_alvo_total: totalPessoas
+    };
+  }
+
+  return null;
 }

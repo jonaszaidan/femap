@@ -2,30 +2,23 @@
 
 import React from "react";
 
-interface MunicipioRanking {
-  ranking: number;
-  municipioUf: string;
-  total: string | number;
+export interface ItemTabelaRanking {
+  codigo_ibge?: number | string;
+  municipio: string;
+  uf: string;
+  cobertura: number | string;
 }
 
 interface TabelaCoberturaProps {
   anoReferencia?: string;
-  dados?: MunicipioRanking[];
+  dados?: ItemTabelaRanking[];
+  loading?: boolean;
 }
-
-const dadosMock: MunicipioRanking[] = [
-  { ranking: 1, municipioUf: "Município A - MA", total: "12%" },
-  { ranking: 2, municipioUf: "Município B - PI", total: "14%" },
-  { ranking: 3, municipioUf: "Município C - CE", total: "15%" },
-  { ranking: 4, municipioUf: "Município D - BA", total: "18%" },
-  { ranking: 5, municipioUf: "Município E - PA", total: "19%" },
-  { ranking: 6, municipioUf: "Município F - PB", total: "20%" },
-  { ranking: 7, municipioUf: "Município G - RN", total: "21%" },
-];
 
 export default function Tabela_Cobertura_Rastreamento({
   anoReferencia = "2024",
-  dados = dadosMock,
+  dados = [],
+  loading = false,
 }: TabelaCoberturaProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -50,17 +43,41 @@ export default function Tabela_Cobertura_Rastreamento({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 text-sm text-slate-700 font-medium">
-            {dados.map((item) => (
-              <tr key={item.ranking} className="hover:bg-slate-50 transition-colors">
-                <td className="py-2.5 px-4 text-center font-bold text-slate-600">
-                  {item.ranking}º
-                </td>
-                <td className="py-2.5 px-4">{item.municipioUf}</td>
-                <td className="py-2.5 px-4 text-right font-semibold text-slate-900">
-                  {item.total}
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="py-6 text-center text-slate-400">
+                  Carregando ranking...
                 </td>
               </tr>
-            ))}
+            ) : dados.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="py-6 text-center text-slate-400">
+                  Nenhum dado encontrado para o ano selecionado.
+                </td>
+              </tr>
+            ) : (
+              dados.map((item, index) => {
+                const valorCobertura = Number(item.cobertura || 0);
+
+                return (
+                  <tr
+                    key={item.codigo_ibge || index}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="py-2.5 px-4 text-center font-bold text-slate-600">
+                      {index + 1}º
+                    </td>
+                    <td className="py-2.5 px-4">
+                      {item.municipio} - {item.uf}
+                    </td>
+                    <td className="py-2.5 px-4 text-right font-semibold text-slate-900">
+                      {/* Formata diretamente com 1 casa decimal */}
+                      {`${valorCobertura.toFixed(1)}%`}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
