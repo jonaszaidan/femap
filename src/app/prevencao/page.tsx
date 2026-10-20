@@ -1,6 +1,6 @@
 import Header from "../../components/Header";
 import NavTabs from "../../components/NavTabs";
-import DashboardPapSmear from "../../components/Dashboard_PapaNicolau";
+import DashboardVacinacao from "../../components/Dashboard_Prevencao_Vacinacao";
 
 export default async function PrevencaoPage() {
   return (
@@ -8,7 +8,7 @@ export default async function PrevencaoPage() {
       <Header />
       <NavTabs />
 
-      <DashboardPapSmear />
+      <DashboardVacinacao />
     </main>
   );
 }
