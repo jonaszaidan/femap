@@ -20,24 +20,33 @@ export default function MapaPrevencao_UF({ vacinacaoUFAno = [] }: Props) {
   const [geojson, setGeojson] = useState<any>(null);
 
   useEffect(() => {
-    fetch("/mapas/brasil-estados.geojson")
-      .then((res) => res.json())
+    // Obtém o prefixo de caminho base do Next.js (ex: '/femap' no GitHub Pages)
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+    const geojsonUrl = `${basePath}/mapas/brasil-estados.geojson`;
+
+    fetch(geojsonUrl)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Erro HTTP ao buscar GeoJSON: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => setGeojson(data))
       .catch((err) => console.error("Erro ao carregar GeoJSON:", err));
   }, []);
 
-  // Escala de cores para Vacinação contra HPV
+  // Define escala de cores para Taxa de Vacinação HPV (%)
   const getCor = (valor: number) => {
     if (valor <= 0) return "#E5E7EB";
-    if (valor < 50.0) return "#FEE2E2"; // Baixa cobertura
-    if (valor < 70.0) return "#FEF08A"; // Média cobertura
-    if (valor < 85.0) return "#BBF7D0"; // Boa cobertura
-    return "#15803D";                  // Excelente cobertura
+    if (valor < 50.0) return "#FEE2E2"; // Baixa cobertura (Vermelho suave)
+    if (valor < 70.0) return "#FEF08A"; // Média cobertura (Amarelo)
+    if (valor < 85.0) return "#BBF7D0"; // Boa cobertura (Verde claro)
+    return "#15803D";                  // Excelente cobertura (Verde escuro)
   };
 
   const listaDados = Array.isArray(vacinacaoUFAno) ? vacinacaoUFAno : [];
 
-  // Função para extrair a sigla da UF independente de como ela está nomeada no GeoJSON
+  // Extrai a sigla da UF independente das variações de propriedades do GeoJSON
   const extrairUF = (properties: any) => {
     if (!properties) return "";
     return (
@@ -50,7 +59,7 @@ export default function MapaPrevencao_UF({ vacinacaoUFAno = [] }: Props) {
     ).toString().trim().toUpperCase();
   };
 
-  // Função para extrair o Nome do Estado do GeoJSON
+  // Extrai o nome do Estado
   const extrairNomeEstado = (properties: any) => {
     if (!properties) return "";
     return (
