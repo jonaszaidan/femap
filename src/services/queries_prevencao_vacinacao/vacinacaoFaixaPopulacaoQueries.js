@@ -2,14 +2,23 @@ import { supabase } from '../../lib/supabase';
 
 /**
  * Consulta a população alvo por idade/faixa etária para vacinação HPV,
- * dividida por sexo (Feminino e Masculino), desconsiderando '9 a 14 Anos'.
+ * dividida por sexo (Feminino e Masculino) e aplicando o filtro de sexo selecionado,
+ * desconsiderando '9 a 14 Anos'.
  */
-export async function getPopulacaoAlvoPorFaixaVacinacao(ano) {
-  const { data, error } = await supabase
+export async function getPopulacaoAlvoPorFaixaVacinacao(ano, sexo = 'geral') {
+  let query = supabase
     .from('vacinacao_uf')
     .select('ano_cobertura, sexo, populacao, denominador')
     .eq('ano', Number(ano))
     .neq('ano_cobertura', '9 a 14 Anos');
+
+  // Aplica o filtro de sexo se for diferente de 'geral'
+  if (sexo && sexo !== 'geral') {
+    const sexoFormatado = sexo.charAt(0).toUpperCase() + sexo.slice(1);
+    query = query.eq('sexo', sexoFormatado);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao buscar população por faixa etária de vacinação:', error);

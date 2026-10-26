@@ -14,12 +14,15 @@ import { getVacinacaoPorEstado } from "../services/queries_prevencao_vacinacao/v
 import { getKpisVacinacao } from "../services/queries_prevencao_vacinacao/vacinacaoKpisQueries";
 import { getPopulacaoAlvoPorFaixaVacinacao } from "../services/queries_prevencao_vacinacao/vacinacaoFaixaPopulacaoQueries";
 
-// Queries do Supabase para o módulo de Evolucação Vacinação contra o HPV
+// Queries do Supabase para o módulo de Evolução Vacinação contra o HPV
 import { getEvolucaoVacinacaoBrasil } from "../services/queries_prevencao_vacinacao/vacinacaoEvolucaoQueries";
 
 export default function DashboardPrevencaoVacinacao() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
   const anosDisponiveis = [2026, 2025, 2024, 2023, 2022, 2021, 2020];
+
+  // Estado para o filtro de sexo ("geral" como padrão, "masculino", "feminino")
+  const [sexoSelecionado, setSexoSelecionado] = useState<string>("geral");
 
   // Estados dos KPIs
   const [taxaCoberturaKpi, setTaxaCoberturaKpi] = useState<string>("0%");
@@ -35,35 +38,33 @@ export default function DashboardPrevencaoVacinacao() {
   // Estado de Carregamento
   const [loading, setLoading] = useState<boolean>(false);
  
-  // Estado do componente Evolucao PrevencaoVacinacao:
-const [dadosEvolucao, setDadosEvolucao] = useState<any[]>([]);  
+  // Estado para a Evolução Temporal da Vacinação
+  const [dadosEvolucao, setDadosEvolucao] = useState<any[]>([]);  
 
-
-useEffect(() => {
-  async function carregarEvolucao() {
-    const dados = await getEvolucaoVacinacaoBrasil();
-    setDadosEvolucao(dados);
-  }
-  carregarEvolucao();
-}, []);
-
-  // Carrega todos os dados assincronamente ao alterar o ano selecionado
+  // Carrega a evolução temporal sempre que o filtro de sexo for alterado
   useEffect(() => {
-    async function carregarDadosAno() {
+    async function carregarEvolucao() {
+      const dados = await getEvolucaoVacinacaoBrasil(sexoSelecionado);
+      setDadosEvolucao(dados);
+    }
+    carregarEvolucao();
+  }, [sexoSelecionado]);
+
+  // Carrega todos os dados assincronamente ao alterar o ano ou o sexo selecionado
+  useEffect(() => {
+    async function carregarDadosComFiltros() {
       setLoading(true);
 
       const [dadosMapaVacina, kpis, dadosFaixa] = await Promise.all([
-        getVacinacaoPorEstado(anoSelecionado),
-        getKpisVacinacao(anoSelecionado),
-        getPopulacaoAlvoPorFaixaVacinacao(anoSelecionado),
+        getVacinacaoPorEstado(anoSelecionado, sexoSelecionado),
+        getKpisVacinacao(anoSelecionado, sexoSelecionado),
+        getPopulacaoAlvoPorFaixaVacinacao(anoSelecionado, sexoSelecionado),
       ]);
-
-      
 
       // Atualiza o estado do Mapa
       setVacinacaoUFAno(dadosMapaVacina || []);
 
-      // Atualiza o estado da População por Faixa Etária
+      // Atualiza o estado da População por Faixa Etária (agora contendo feminino e masculino)
       setDadosFaixaEtaria(dadosFaixa || []);
 
       // Atualiza os valores formatados dos KPIs
@@ -76,16 +77,52 @@ useEffect(() => {
       setLoading(false);
     }
 
-    carregarDadosAno();
-  }, [anoSelecionado]);
+    carregarDadosComFiltros();
+  }, [anoSelecionado, sexoSelecionado]);
 
   return (
     <div className="space-y-6">
-      {/* CABEÇALHO DO DASHBOARD COM O SELECT DE ANO */}
-      <div className="bg-[#8B9BB4] text-white rounded-xl px-6 py-3 flex justify-between items-center font-bold text-lg shadow-sm">
-        <h2>Prevenção Primária: Vacinação contra o HPV</h2>
+      {/* CABEÇALHO DO DASHBOARD COM O SELECT DE ANO E O FILTRO DE SEXO */}
+      <div className="bg-[#8B9BB4] text-white rounded-xl px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
+        <h2 className="text-lg font-bold">Prevenção Primária: Vacinação contra o HPV</h2>
 
-        <div className="flex items-center gap-4 text-sm font-normal">
+        {/* Grupo de Filtros (Sexo e Ano) */}
+        <div className="flex flex-wrap items-center gap-4 text-sm font-normal">
+          
+          {/* Abas de Filtro de Sexo (Geral como Standard) */}
+          <div className="flex items-center bg-white/20 p-1 rounded-lg">
+            <button
+              onClick={() => setSexoSelecionado("geral")}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                sexoSelecionado === "geral"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-white hover:bg-white/10"
+              }`}
+            >
+              Geral
+            </button>
+            <button
+              onClick={() => setSexoSelecionado("feminino")}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                sexoSelecionado === "feminino"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-white hover:bg-white/10"
+              }`}
+            >
+              Feminino
+            </button>
+            <button
+              onClick={() => setSexoSelecionado("masculino")}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                sexoSelecionado === "masculino"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-white hover:bg-white/10"
+              }`}
+            >
+              Masculino
+            </button>
+          </div>
+
           <span>
             Referência: <strong>Brasil</strong>
           </span>
@@ -119,6 +156,7 @@ useEffect(() => {
           <Alvo_Faixa_Etaria_Vacinacao
             dados={dadosFaixaEtaria}
             loading={loading}
+            sexoFiltro={sexoSelecionado}
           />
         </div>
 

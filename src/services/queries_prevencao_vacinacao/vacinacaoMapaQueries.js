@@ -1,15 +1,23 @@
 import { supabase } from '../../lib/supabase';
 
 /**
- * Consulta os dados de taxa de vacinação contra HPV por UF para um determinado ano,
+ * Consulta os dados de taxa de vacinação contra HPV por UF para um determinado ano e sexo,
  * considerando a faixa etária total de '9 a 14 Anos'.
  */
-export async function getVacinacaoPorEstado(ano) {
-  const { data, error } = await supabase
+export async function getVacinacaoPorEstado(ano, sexo = 'geral') {
+  let query = supabase
     .from('vacinacao_uf')
     .select('id, uf, estado, sexo, ano_cobertura, doses, populacao, ano, tx_vacinacao_uf')
     .eq('ano', Number(ano))
     .eq('ano_cobertura', '9 a 14 Anos');
+
+  // Aplica o filtro de sexo se for diferente de 'geral'
+  if (sexo && sexo !== 'geral') {
+    const sexoFormatado = sexo.charAt(0).toUpperCase() + sexo.slice(1);
+    query = query.eq('sexo', sexoFormatado);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao buscar dados de vacinação por estado:', error);
