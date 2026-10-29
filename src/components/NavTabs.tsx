@@ -1,34 +1,37 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function NavTabs() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const tabs = [
-    { name: "Mortalidade", href: "/mortalidade" },
-    { name: "Prevenção / Vacinação", href: "/prevencao" },
-    { name: "Papanicolau", href: "/papanicolau" }, // <--- Adicionado aqui
-    { name: "Mapa de Prioridades", href: "/mapaprioridade" }, // Ajuste conforme a sua rota real
+  const abas = [
+    { id: "mortalidade", label: "Mortalidade", path: "/mortalidade" },
+    { id: "vacinacao", label: "Prevenção / Vacinação", path: "/prevencao" },
+    { id: "papanicolau", label: "Papanicolau", path: "/papanicolau" },
+    { id: "prioridades", label: "Mapa de Prioridades", path: "/mapaprioridade" },
   ];
 
   return (
-    <div className="flex gap-4 mb-6">
-      {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
+    <div className="flex flex-wrap items-center gap-3 mb-6">
+      {abas.map((aba) => {
+        // Verifica se a rota atual corresponde à aba
+        const estaAtiva = pathname?.includes(aba.path);
+
         return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`px-4 py-2 rounded-xl font-semibold transition-colors ${
-              isActive
-                ? "bg-pink-600 text-white shadow"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          <button
+            key={aba.id}
+            onClick={() => router.push(aba.path)}
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer ${
+              estaAtiva
+                ? "bg-[#8B9BB4] text-white shadow"
+                : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
             }`}
           >
-            {tab.name}
-          </Link>
+            {aba.label}
+          </button>
         );
       })}
     </div>

@@ -17,6 +17,9 @@ import { getPopulacaoAlvoPorFaixaVacinacao } from "../services/queries_prevencao
 // Queries do Supabase para o módulo de Evolução Vacinação contra o HPV
 import { getEvolucaoVacinacaoBrasil } from "../services/queries_prevencao_vacinacao/vacinacaoEvolucaoQueries";
 
+// Query dos 10 municípios com menor cobertura vacinal
+import { getTop10MenoresCoberturaVacinalMunicipios } from "../services/queries_prevencao_vacinacao/vacinacaoTabelaMunicipiosQueries";
+
 export default function DashboardPrevencaoVacinacao() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
   const anosDisponiveis = [2026, 2025, 2024, 2023, 2022, 2021, 2020];
@@ -34,12 +37,15 @@ export default function DashboardPrevencaoVacinacao() {
 
   // Estado para os dados do Mapa por UF (Vacinação HPV)
   const [vacinacaoUFAno, setVacinacaoUFAno] = useState<any[]>([]);
-  
+
+  // Estado para os 10 municípios com menor cobertura
+  const [dadosPioresMunicipios, setDadosPioresMunicipios] = useState<any[]>([]);
+
   // Estado de Carregamento
   const [loading, setLoading] = useState<boolean>(false);
- 
+
   // Estado para a Evolução Temporal da Vacinação
-  const [dadosEvolucao, setDadosEvolucao] = useState<any[]>([]);  
+  const [dadosEvolucao, setDadosEvolucao] = useState<any[]>([]);
 
   // Carrega a evolução temporal sempre que o filtro de sexo for alterado
   useEffect(() => {
@@ -55,17 +61,29 @@ export default function DashboardPrevencaoVacinacao() {
     async function carregarDadosComFiltros() {
       setLoading(true);
 
-      const [dadosMapaVacina, kpis, dadosFaixa] = await Promise.all([
+      // Tipagem explícita para evitar o erro do TypeScript
+      const sexoQuery: string | null =
+        sexoSelecionado === "feminino"
+          ? "Feminino"
+          : sexoSelecionado === "masculino"
+          ? "Masculino"
+          : null;
+
+      const [dadosMapaVacina, kpis, dadosFaixa, dadosPiores] = await Promise.all([
         getVacinacaoPorEstado(anoSelecionado, sexoSelecionado),
         getKpisVacinacao(anoSelecionado, sexoSelecionado),
         getPopulacaoAlvoPorFaixaVacinacao(anoSelecionado, sexoSelecionado),
+        getTop10MenoresCoberturaVacinalMunicipios(anoSelecionado, sexoQuery),
       ]);
 
       // Atualiza o estado do Mapa
       setVacinacaoUFAno(dadosMapaVacina || []);
 
-      // Atualiza o estado da População por Faixa Etária (agora contendo feminino e masculino)
+      // Atualiza o estado da População por Faixa Etária
       setDadosFaixaEtaria(dadosFaixa || []);
+
+      // Atualiza o estado dos 10 municípios com menor cobertura
+      setDadosPioresMunicipios(dadosPiores || []);
 
       // Atualiza os valores formatados dos KPIs
       if (kpis) {
@@ -88,7 +106,6 @@ export default function DashboardPrevencaoVacinacao() {
 
         {/* Grupo de Filtros (Sexo e Ano) */}
         <div className="flex flex-wrap items-center gap-4 text-sm font-normal">
-          
           {/* Abas de Filtro de Sexo (Geral como Standard) */}
           <div className="flex items-center bg-white/20 p-1 rounded-lg">
             <button
@@ -173,7 +190,11 @@ export default function DashboardPrevencaoVacinacao() {
 
       {/* TABELA DE MUNICÍPIOS DE VACINAÇÃO */}
       <div className="w-full">
-        <Tabela_Cobertura_Vacinacao anoReferencia={String(anoSelecionado)} />
+        <Tabela_Cobertura_Vacinacao
+          anoReferencia={String(anoSelecionado)}
+          dados={dadosPioresMunicipios}
+          loading={loading}
+        />
       </div>
     </div>
   );

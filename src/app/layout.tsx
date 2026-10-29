@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Footer from "../components/Footer"; // Importando o Footer que criamos
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Femap | Map the signals that move your business",
+  title: "FemMap | Plataforma Inteligente de Saúde da Mulher",
   description:
-    "Femap helps teams surface market signals, align strategy, and act with confidence using a live map of growth opportunities.",
+    "FemMap ajuda gestores e equipes a monitorar indicadores de saúde da mulher.",
 };
 
 export default function RootLayout({
@@ -25,10 +26,18 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#F0E2F0] text-slate-900">
+        {/* Conteúdo principal das páginas */}
+        <div className="flex-grow">
+          {children}
+        </div>
+
+        {/* Rodapé fixo ao final de todas as telas */}
+        <Footer />
+      </body>
     </html>
   );
 }
