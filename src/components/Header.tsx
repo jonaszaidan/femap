@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import logoFemMap from "./icones/logo-femmap.jpg";
+import logoFemMap from "@/public/imagens/logo-femmap.jpg";
 
 export default function Header() {
   const dataAtualizacao = "29/10/2026";
@@ -17,6 +17,8 @@ export default function Header() {
           <Image 
             src={logoFemMap}
             alt="Logo FemMap"
+            width={112}
+            height={112}
             className="w-full h-full object-contain"
             priority
           />
@@ -32,7 +34,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Bloco Direito: Links de Navegação e Data de Atualização */}
+      {/* Restante do Header (Links e Data) */}
       <div className="flex items-center gap-6">
         <nav className="flex items-center gap-2">
           <Link 
@@ -49,7 +51,6 @@ export default function Header() {
           </Link>
         </nav>
 
-        {/* Bloco de Data de Atualização (Totalmente plano, sem fundo/borda) */}
         <div className="text-right flex flex-col items-end gap-0.5 px-2 py-1">
           <span className="text-xs font-semibold text-slate-400">
             Última atualização
