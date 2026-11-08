@@ -6,21 +6,26 @@ import { VacinacaoUFItem } from "./MapaPrevencao_UF";
 interface DynamicMapaProps {
   vacinacaoUFAno?: VacinacaoUFItem[];
   loading?: boolean;
+  filtro?: string; // "geral" | "feminino" | "masculino"
 }
 
 const MapaPrevencao_UF = dynamic(
   () => import("./MapaPrevencao_UF"),
-  { 
+  {
     ssr: false,
     loading: () => (
       <div className="w-full h-[500px] flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg font-medium">
         Carregando mapa de vacinação...
       </div>
-    )
+    ),
   }
 );
 
-export default function DynamicMapaVacinacao({ vacinacaoUFAno, loading }: DynamicMapaProps) {
+export default function DynamicMapaVacinacao({
+  vacinacaoUFAno,
+  loading,
+  filtro = "geral",
+}: DynamicMapaProps) {
   if (loading) {
     return (
       <div className="w-full h-[500px] flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg font-medium">
@@ -29,5 +34,11 @@ export default function DynamicMapaVacinacao({ vacinacaoUFAno, loading }: Dynami
     );
   }
 
-  return <MapaPrevencao_UF vacinacaoUFAno={vacinacaoUFAno} loading={loading} />;
+  return (
+    <MapaPrevencao_UF
+      vacinacaoUFAno={vacinacaoUFAno}
+      loading={loading}
+      filtro={filtro}
+    />
+  );
 }

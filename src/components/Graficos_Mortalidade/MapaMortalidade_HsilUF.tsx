@@ -38,13 +38,13 @@ export default function MapaMortalidadeHsilUF({
       });
   }, []);
 
-  const getCor = (valor: number) => {
-    if (!valor || valor <= 0) return "rgb(241, 245, 249)"; // Sem dados / Zero
-    if (valor < 0.2) return "rgb(237, 248, 233)"; // Muito Baixa
-    if (valor < 0.4) return "rgb(186, 228, 179)"; // Baixa
-    if (valor < 0.6) return "rgb(116, 196, 118)"; // Média
-    if (valor < 0.9) return "rgb(49, 163, 84)";   // Alta
-    return "rgb(0, 109, 44)";                     // Muito Alta
+    const getCor = (valor: number) => {
+    if (valor <= 0) return "rgb(241, 245, 249)"; // Sem dados ou Zero (cinza claro)
+    if (valor < 0.2) return "#F1EBF6"; // Nível 1 (< 0.2)
+    if (valor < 0.5) return "#D7C4E5"; // Nível 2 (0.2 - 0.5)
+    if (valor < 1.0) return "#B397CB"; // Nível 3 (0.5 - 1.0)
+    if (valor < 2.0) return "#76528F"; // Nível 4 (1.0 - 2.0)
+    return "#49305F";                  // Nível 5 (> 2.0)
   };
 
   // Garante que listaDados é sempre um Array válido
@@ -139,27 +139,32 @@ export default function MapaMortalidadeHsilUF({
       {/* Legenda Posicionada à Esquerda */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm p-2.5 rounded-md shadow-md text-xs space-y-1 border border-slate-100">
         <div className="font-semibold text-gray-700 mb-1">Taxa HSIL</div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "rgb(237, 248, 233)" }}></span>
-          <span>Nível 1 (&lt; 0.2)</span>
+    <div className="flex items-center gap-1.5">
+  <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "rgb(241, 245, 249)" }}></span>
+  <span>Sem dados / Zero</span>
+</div>
+    <div className="flex items-center gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "#F1EBF6" }}></span>
+      <span>Nível 1 (&lt; 0.2)</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#D7C4E5" }}></span>
+      <span>Nível 2 (0.2 - 0.5)</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#B397CB" }}></span>
+      <span>Nível 3 (0.5 - 1.0)</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#76528F" }}></span>
+      <span>Nível 4 (1.0 - 2.0)</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#49305F" }}></span>
+      <span>Nível 5 (&gt; 2.0)</span>
+    </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(186, 228, 179)" }}></span>
-          <span>Nível 2 (0.2 - 0.4)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(116, 196, 118)" }}></span>
-          <span>Nível 3 (0.4 - 0.6)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(49, 163, 84)" }}></span>
-          <span>Nível 4 (0.6 - 0.9)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(0, 109, 44)" }}></span>
-          <span>Nível 5 (&gt; 0.9)</span>
-        </div>
-      </div>
+      
     </div>
   );
 }

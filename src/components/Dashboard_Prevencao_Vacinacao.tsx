@@ -20,12 +20,22 @@ import { getEvolucaoVacinacaoBrasil } from "../services/queries_prevencao_vacina
 // Query dos 10 municípios com menor cobertura vacinal
 import { getTop10MenoresCoberturaVacinalMunicipios } from "../services/queries_prevencao_vacinacao/vacinacaoTabelaMunicipiosQueries";
 
+// Cor do cabeçalho por filtro (tom mais escuro de cada paleta)
+const TEMAS_CABECALHO: Record<string, string> = {
+  geral: "#49305F",
+  feminino: "#85264F",
+  masculino: "#5278B0",
+};
+
 export default function DashboardPrevencaoVacinacao() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
   const anosDisponiveis = [2026, 2025, 2024, 2023, 2022, 2021, 2020];
 
   // Estado para o filtro de sexo ("geral" como padrão, "masculino", "feminino")
   const [sexoSelecionado, setSexoSelecionado] = useState<string>("geral");
+
+  // Cor do cabeçalho de acordo com o filtro de sexo
+  const corCabecalho = TEMAS_CABECALHO[sexoSelecionado] ?? TEMAS_CABECALHO.geral;
 
   // Estados dos KPIs
   const [taxaCoberturaKpi, setTaxaCoberturaKpi] = useState<string>("0%");
@@ -101,7 +111,10 @@ export default function DashboardPrevencaoVacinacao() {
   return (
     <div className="space-y-6">
       {/* CABEÇALHO DO DASHBOARD COM O SELECT DE ANO E O FILTRO DE SEXO */}
-      <div className="bg-[#8B9BB4] text-white rounded-xl px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
+      <div
+        className="text-white rounded-xl px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm transition-colors duration-300"
+        style={{ backgroundColor: corCabecalho }}
+      >
         <h2 className="text-lg font-bold">Prevenção Primária: Vacinação contra o HPV</h2>
 
         {/* Grupo de Filtros (Sexo e Ano) */}
@@ -169,6 +182,7 @@ export default function DashboardPrevencaoVacinacao() {
             taxaCobertura={loading ? "..." : taxaCoberturaKpi}
             dosesAplicadas={loading ? "..." : dosesAplicadasKpi}
             populacaoAlvo={loading ? "..." : populacaoAlvoKpi}
+            filtro={sexoSelecionado}
           />
           <Alvo_Faixa_Etaria_Vacinacao
             dados={dadosFaixaEtaria}
@@ -179,13 +193,21 @@ export default function DashboardPrevencaoVacinacao() {
 
         {/* MAPA DINÂMICO DE VACINAÇÃO COM DADOS REAIS DO SUPABASE */}
         <div className="lg:col-span-7 bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col min-h-[500px]">
-          <DynamicMapaVacinacao vacinacaoUFAno={vacinacaoUFAno} loading={loading} />
+          <DynamicMapaVacinacao
+            vacinacaoUFAno={vacinacaoUFAno}
+            loading={loading}
+            filtro={sexoSelecionado}
+          />
         </div>
       </div>
 
       {/* EVOLUÇÃO TEMPORAL DA COBERTURA */}
       <div className="w-full">
-        <Evolucao_Vacinacao dados={dadosEvolucao} referencia="Brasil" />
+        <Evolucao_Vacinacao
+          dados={dadosEvolucao}
+          referencia="Brasil"
+          filtro={sexoSelecionado}
+        />
       </div>
 
       {/* TABELA DE MUNICÍPIOS DE VACINAÇÃO */}

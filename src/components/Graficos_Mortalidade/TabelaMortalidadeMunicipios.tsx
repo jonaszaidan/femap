@@ -15,7 +15,7 @@ interface Props {
 export default function TabelaMortalidadeMunicipios({
   titulo,
   dados = [],
-  corTextoTaxa = "text-pink-600",
+  corTextoTaxa = "#0B7A75",
 }: Props) {
   const listaDados = Array.isArray(dados) ? dados : [];
 

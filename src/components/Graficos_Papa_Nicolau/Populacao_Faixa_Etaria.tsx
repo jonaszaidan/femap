@@ -12,6 +12,10 @@ interface AlvoFaixaEtariaProps {
   loading?: boolean;
 }
 
+// Paleta amarelo/dourado (Rastreamento)
+const COR_DESTAQUE = "#E5A900"; // barra preenchida
+const COR_TRILHO = "#FFF8E5";   // fundo da barra (1º tom da paleta)
+
 export default function Alvo_Faixa_Etaria({
   dados = [],
   loading = false,
@@ -50,10 +54,13 @@ export default function Alvo_Faixa_Etaria({
                 </span>
 
                 {/* 2. Barra de progresso com comprimento ajustado */}
-                <div className="flex-1 bg-purple-50 h-4 rounded-sm overflow-hidden relative">
+                <div
+                  className="flex-1 h-4 rounded-sm overflow-hidden relative"
+                  style={{ backgroundColor: COR_TRILHO }}
+                >
                   <div
-                    className="bg-purple-300 h-full rounded-sm transition-all duration-500"
-                    style={{ width: `${pct}%` }}
+                    className="h-full rounded-sm transition-all duration-500"
+                    style={{ width: `${pct}%`, backgroundColor: COR_DESTAQUE }}
                   />
                 </div>
 

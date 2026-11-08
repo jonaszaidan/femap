@@ -33,13 +33,14 @@ export default function MapaMortalidadeUF({
       .catch((err) => console.error("Erro no mapa UF:", err));
   }, []);
 
+  // Paleta verde-petróleo (Identidade 1) — Mortalidade CCU
   const getCor = (valor: number) => {
-    if (!valor || valor <= 0) return "rgb(241, 245, 249)"; // Sem dados / Zero (Cinza claro)
-    if (valor < 3.0) return "rgb(247, 244, 249)"; // Nível 1 (< 3.0)
-    if (valor < 5.0) return "rgb(235, 160, 180)"; // Nível 2 (3.0 - 5.0)
-    if (valor < 8.0) return "rgb(209, 76, 108)";  // Nível 3 (5.0 - 8.0)
-    if (valor < 10.0) return "rgb(140, 0, 42)";  // Nível 4 (8.0 - 10.0)
-    return "rgb(103, 0, 31)";                    // Nível 5 (> 10.0)
+    if (!valor || valor <= 0) return "rgb(241, 245, 249)"; // Sem dados / Zero (cinza claro)
+    if (valor < 3.0) return "#D2F0EE";  // Nível 1 (< 3.0)
+    if (valor < 5.0) return "#7CCFC8";  // Nível 2 (3.0 - 5.0)
+    if (valor < 8.0) return "#34A39B";  // Nível 3 (5.0 - 8.0)
+    if (valor < 10.0) return "#0B7A75"; // Nível 4 (8.0 - 10.0)
+    return "#004F4B";                   // Nível 5 (> 10.0)
   };
 
   const listaDados = Array.isArray(mortalidadeUFAno) ? mortalidadeUFAno : [];
@@ -138,20 +139,24 @@ export default function MapaMortalidadeUF({
           <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "rgb(247, 244, 249)" }}></span>
           <span>Nível 1 (&lt; 3.0)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(235, 160, 180)" }}></span>
-          <span>Nível 2 (3.0 - 5.0)</span>
+      <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "#D2F0EE" }}></span>
+            <span>Nível 1 (&lt; 3.0)</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(209, 76, 108)" }}></span>
-          <span>Nível 3 (5.0 - 8.0)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(140, 0, 42)" }}></span>
-          <span>Nível 4 (8.0 - 10.0)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(103, 0, 31)" }}></span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#7CCFC8" }}></span>
+            <span>Nível 2 (3.0 - 5.0)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#34A39B" }}></span>
+            <span>Nível 3 (5.0 - 8.0)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#0B7A75" }}></span>
+            <span>Nível 4 (8.0 - 10.0)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#004F4B" }}></span>
           <span>Nível 5 (&gt; 10.0)</span>
         </div>
       </div>

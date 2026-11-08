@@ -96,11 +96,11 @@ function normalizarTexto(texto: string = "") {
     .trim();
 }
 
+// Paleta Opção F — verde mineral, amarelo suave e coral frio
 function getColor(taxa: number) {
-  if (taxa > 15) return "#C00000"; // Prioridade Máxima
-  if (taxa > 10) return "#ED7D31";
-  if (taxa > 5)  return "#FFC000";
-  if (taxa > 0)  return "#00B050";
+  if (taxa > 15) return "#B94F69"; // Alta (Prioridade Máxima)
+  if (taxa > 5)  return "#E8D66F"; // Média
+  if (taxa > 0)  return "#91C7B5"; // Baixa
   return "#aaadab";               // Sem dados / Taxa 0.00
 }
 
@@ -162,7 +162,7 @@ export default function MapaPrioridade_Municipios({
     const municipiosFiltrados = geoData.features.filter((feature: any) => {
       const props = feature.properties || {};
       const idIbge = String(props.id || props.GEOCODIGO || props.code || "").trim();
-      
+
       const prefixoUfMap: Record<string, string> = {
         "11": "RO", "12": "AC", "13": "AM", "14": "RR", "15": "PA", "16": "AP", "17": "TO",
         "21": "MA", "22": "PI", "23": "CE", "24": "RN", "25": "PB", "26": "PE", "27": "AL", "28": "SE", "29": "BA",
@@ -233,7 +233,7 @@ export default function MapaPrioridade_Municipios({
     layer.bindTooltip(
       `<div style="font-size: 12px; font-weight: 600; color: #1e293b;">
         <strong style="color: #0f172a;">${nomeMunicipio}</strong><br/>
-        <span style="color: #7e22ce;">Mortalidade: ${
+        <span style="color: #B94F69;">Mortalidade: ${
           taxa > 0 ? taxa.toFixed(2) : "0.00 / Sem dados"
         }</span>
       </div>`,
@@ -250,7 +250,7 @@ export default function MapaPrioridade_Municipios({
           <select
             value={ufSelecionada}
             onChange={(e) => setUfSelecionada(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all cursor-pointer"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#B94F69]/20 focus:border-[#B94F69] transition-all cursor-pointer"
           >
             <option value="TODOS">Todos os Estados (Brasil)</option>
             {LISTA_UFS.map((uf) => (
@@ -262,8 +262,8 @@ export default function MapaPrioridade_Municipios({
         </div>
 
         <div className="text-xs text-slate-500 font-medium">
-          {ufSelecionada === "TODOS" 
-            ? "Exibindo visão nacional completa" 
+          {ufSelecionada === "TODOS"
+            ? "Exibindo visão nacional completa"
             : `Zoom aplicado para o estado: ${ufSelecionada}`}
         </div>
       </div>
@@ -296,19 +296,16 @@ export default function MapaPrioridade_Municipios({
           <p className="font-bold text-slate-800 mb-2">Taxa de Mortalidade</p>
           <div className="space-y-1.5 font-medium">
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-sm bg-[#C00000]" />
+              <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: "#B94F69" }} />
               <span>&gt; 15.0 (Prioridade Máxima)</span>
             </div>
+
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-sm bg-[#ED7D31]" />
-              <span>10.0 - 15.0</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-sm bg-[#FFC000]" />
+              <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: "#E8D66F" }} />
               <span>5.0 - 10.0</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-sm bg-[#00B050]" />
+              <span className="w-3.5 h-3.5 rounded-sm" style={{ backgroundColor: "#91C7B5" }} />
               <span>0.1 - 5.0</span>
             </div>
             <div className="flex items-center gap-2">

@@ -36,14 +36,14 @@ export default function KpiCards({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       {/* 1. KPI Mortalidade (Dinâmico) */}
-      <div className="bg-[#67001f]/10 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900 border border-[#67001f]/20">
+      <div className="bg-[#0B7A75]/60 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900 border border-[#0B7A75]/20">
         <h2 className="text-xl font-extrabold mb-4">Mortalidade</h2>
         <div className="grid grid-cols-3 gap-2 w-full items-end">
           <div className="flex flex-col items-center">
             <p className="text-2xl xl:text-3xl font-extrabold leading-none">
               {taxaMortalidadeCCU}
             </p>
-            <p className="text-[11px] font-semibold text-gray-700 mt-2 leading-tight">
+            <p className="text-[11px] font-extrabold text-gray-700 mt-2 leading-tight">
               a cada 100 mil mulheres
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function KpiCards({
             <p className="text-2xl xl:text-3xl font-extrabold leading-none">
               {formatarInteiro(totalObitos)}
             </p>
-            <p className="text-[11px] font-semibold text-gray-700 mt-2 leading-tight">
+            <p className="text-[11px] font-extrabold text-gray-700 mt-2 leading-tight">
               mortes
             </p>
           </div>
@@ -64,7 +64,7 @@ export default function KpiCards({
             <p className="text-[10px] font-bold text-gray-900 mt-1 leading-tight">
               Estado com maior taxa de mortalidade
             </p>
-            <p className="text-[10px] text-gray-700 font-medium mt-1 leading-tight">
+            <p className="text-[10px] text-gray-700 font-extrabold mt-1 leading-tight">
               {piorEstadoMortalidade?.taxa || 0} /100 mil mulheres
             </p>
           </div>
@@ -108,14 +108,14 @@ export default function KpiCards({
       </div>
 
       {/* 3. KPI HSIL (Dinâmico) */}
-      <div className="bg-green-100/70 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900">
+      <div className="bg-[#76528F]/90 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900">
         <h2 className="text-xl font-extrabold mb-4">HSIL</h2>
         <div className="grid grid-cols-3 gap-2 w-full items-end">
           <div className="flex flex-col items-center">
             <p className="text-2xl xl:text-3xl font-extrabold leading-none">
               {formatarInteiro(taxaHsil)}
             </p>
-            <p className="text-[11px] font-semibold text-gray-700 mt-2 leading-tight">
+            <p className="text-[11px] font-extrabold text-gray-700 mt-2 leading-tight">
               Lesões a cada 100 mil exames
             </p>
           </div>
@@ -124,7 +124,7 @@ export default function KpiCards({
             <p className="text-2xl xl:text-3xl font-extrabold leading-none">
               {formatarInteiro(totalResultadosHsil)}
             </p>
-            <p className="text-[11px] font-semibold text-gray-700 mt-2 leading-tight">
+            <p className="text-[11px] font-extrabold text-gray-700 mt-2 leading-tight">
               Exames satisfatórios
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function KpiCards({
             <p className="text-[10px] font-bold text-gray-900 mt-1 leading-tight">
               Estado com maior percentual de HSIL
             </p>
-            <p className="text-[10px] text-gray-700 font-medium mt-1 leading-tight">
+            <p className="text-[10px] text-gray-700 font-extrabold mt-1 leading-tight">
               {piorEstadoHsil?.taxa ? formatarInteiro(piorEstadoHsil.taxa) : 0} /100 mil exames
             </p>
           </div>

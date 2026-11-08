@@ -19,6 +19,10 @@ import { getColetaPapaNicolauPorEstado } from "../services/queries_papanicolau/p
 import { getPopulacaoAlvoPorFaixaEtaria } from "../services/queries_papanicolau/papaNicolauPopulacaoFaixaQueries";
 import { getTop10MenoresCoberturasMunicipios } from "../services/queries_papanicolau/papaNicolauTabelaQueries";
 
+// Paleta amarelo/dourado (Rastreamento)
+const COR_CABECALHO_BG = "#F5D77F"; // mesmo tom do fundo dos KPIs
+const COR_CABECALHO_TEXTO = "#0f172a"; // texto escuro para contraste
+
 export default function DashboardPapSmear() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
   const anosDisponiveis = [2026, 2025, 2024, 2023, 2022, 2021, 2020];
@@ -133,7 +137,10 @@ export default function DashboardPapSmear() {
   return (
     <div className="space-y-6">
       {/* CABEÇALHO DO DASHBOARD COM O SELECT DE ANO */}
-      <div className="bg-[#8B9BB4] text-white rounded-xl px-6 py-3 flex justify-between items-center font-bold text-lg shadow-sm">
+      <div
+        className="rounded-xl px-6 py-3 flex justify-between items-center font-bold text-lg shadow-sm"
+        style={{ backgroundColor: COR_CABECALHO_BG, color: COR_CABECALHO_TEXTO }}
+      >
         <h2>Prevenção Secundária: Exame de Papanicolaou</h2>
 
         <div className="flex items-center gap-4 text-sm font-normal">

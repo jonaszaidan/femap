@@ -94,14 +94,14 @@ export default function EvolucaoMortalidade_CCU({
                 iconType="plainline"
               />
 
-              {/* Linha 1: HSIL (Verde) */}
+              {/* Linha 1: HSIL (roxo) */}
               <Line
                 type="monotone"
                 dataKey="hsil"
                 name="HSIL"
-                stroke="#15803d"
+                stroke="#76528F"
                 strokeWidth={3}
-                dot={{ r: 4, fill: "#15803d" }}
+                dot={{ r: 4, fill: "#76528F" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               >
@@ -116,14 +116,14 @@ export default function EvolucaoMortalidade_CCU({
                 />
               </Line>
 
-              {/* Linha 2: Incidência (Laranja) */}
+              {/* Linha 2: Incidência (rosa) */}
               <Line
                 type="monotone"
                 dataKey="incidencia"
                 name="Incidência"
-                stroke="#ea580c"
+                stroke="#C34F83"
                 strokeWidth={3}
-                dot={{ r: 4, fill: "#ea580c" }}
+                dot={{ r: 4, fill: "#C34F83" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               >
@@ -138,14 +138,14 @@ export default function EvolucaoMortalidade_CCU({
                 />
               </Line>
 
-              {/* Linha 3: Mortalidade (Roxo) */}
+              {/* Linha 3: Mortalidade (Verde) */}
               <Line
                 type="monotone"
                 dataKey="mortalidade"
                 name="Mortalidade"
-                stroke="#7e22ce"
+                stroke="#004F4B"
                 strokeWidth={3}
-                dot={{ r: 4, fill: "#7e22ce" }}
+                dot={{ r: 4, fill: "#004F4B" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               >

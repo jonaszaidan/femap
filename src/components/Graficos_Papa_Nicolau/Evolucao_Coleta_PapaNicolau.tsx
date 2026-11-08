@@ -21,6 +21,11 @@ interface EvolucaoColetaProps {
   referencia?: string;
 }
 
+// Paleta amarelo/dourado (Rastreamento)
+const COR_DESTAQUE = "#E5A900";     // linha, pontos e legenda
+const COR_BANNER_BG = "#FCEAB8";    // fundo do título (2º tom da paleta)
+const COR_BANNER_TEXTO = "#7A5A0A"; // texto do título (dourado escuro, para contraste)
+
 export default function Evolucao_Coleta_PapaNicolau({
   dados = [],
   referencia = "Brasil",
@@ -28,11 +33,14 @@ export default function Evolucao_Coleta_PapaNicolau({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
       {/* BANNER / CABEÇALHO */}
-      <div className="bg-slate-300 text-white px-6 py-2.5 flex justify-between items-center">
-        <h3 className="font-bold text-base text-slate-800">
+      <div
+        className="px-6 py-2.5 flex justify-between items-center"
+        style={{ backgroundColor: COR_BANNER_BG, color: COR_BANNER_TEXTO }}
+      >
+        <h3 className="font-bold text-base">
           Evolução da cobertura de rastreamento ao longo do tempo
         </h3>
-        <span className="text-xs font-medium text-slate-700">
+        <span className="text-xs font-medium">
           Referência: <strong>{referencia}</strong>
         </span>
       </div>
@@ -41,7 +49,10 @@ export default function Evolucao_Coleta_PapaNicolau({
       <div className="p-6">
         {/* LEGENDA */}
         <div className="flex items-center justify-center gap-2 mb-4 text-xs font-semibold text-slate-700">
-          <span className="w-4 h-0.5 bg-purple-900 rounded-full inline-block" />
+          <span
+            className="w-4 h-0.5 rounded-full inline-block"
+            style={{ backgroundColor: COR_DESTAQUE }}
+          />
           <span>Média da taxa de coleta (%)</span>
         </div>
 
@@ -77,9 +88,9 @@ export default function Evolucao_Coleta_PapaNicolau({
                 <Line
                   type="monotone"
                   dataKey="media_tx_coleta_uf"
-                  stroke="#581c87" // Roxo escuro
+                  stroke={COR_DESTAQUE}
                   strokeWidth={3}
-                  dot={{ r: 4, fill: "#581c87" }}
+                  dot={{ r: 4, fill: COR_DESTAQUE }}
                 >
                   <LabelList
                     dataKey="media_tx_coleta_uf"

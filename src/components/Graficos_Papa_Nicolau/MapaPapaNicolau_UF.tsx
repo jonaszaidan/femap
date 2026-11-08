@@ -37,14 +37,14 @@ export default function MapaColetaPapaNicolauUF({
       });
   }, []);
 
-  // Faixas ajustadas para a Taxa de Coleta de Papanicolau
+  // Faixas da Taxa de Coleta de Papanicolau — Paleta amarelo/dourado
   const getCor = (valor: number) => {
-    if (!valor || valor <= 0) return "rgb(241, 245, 249)";  // Sem dados / Zero
-    if (valor < 15.0) return "rgb(192, 0, 0)"; // Nível 1: Muito Baixa (< 15.0%)
-    if (valor < 18.0) return "rgb(237, 125, 49)"; // Nível 2: Baixa (15.0% - 18.0%)
-    if (valor < 21.0) return "rgb(255, 192, 0)"; // Nível 3: Média (18.0% - 21.0%)
-    if (valor < 25.0) return "rgb(0, 176, 80)";   // Nível 4: Alta (21.0% - 25.0%)
-    return "rgb(0, 125, 50)";                    // Nível 5: Muito Alta (> 25.0%)
+    if (!valor || valor <= 0) return "rgb(241, 245, 249)"; // Sem dados / Zero
+    if (valor < 15.0) return "#FFF8E5"; // Nível 1: Muito Baixa (< 15.0%)
+    if (valor < 18.0) return "#FCEAB8"; // Nível 2: Baixa (15.0% - 18.0%)
+    if (valor < 21.0) return "#F5D77F"; // Nível 3: Média (18.0% - 21.0%)
+    if (valor < 25.0) return "#EAC04B"; // Nível 4: Alta (21.0% - 25.0%)
+    return "#C99A24";                   // Nível 5: Muito Alta (> 25.0%)
   };
 
   // Garante que listaDados é sempre um Array válido
@@ -88,7 +88,7 @@ export default function MapaColetaPapaNicolauUF({
             style={(feature: any) => {
               const siglaGeo = getSiglaFromFeature(feature);
               const estado = encontrarEstado(siglaGeo);
-              
+
               const valor = Number(
                 estado?.media_tx_coleta_uf ?? estado?.taxa ?? 0
               );
@@ -124,7 +124,7 @@ export default function MapaColetaPapaNicolauUF({
                   <br/><br/>
                   Taxa Média de Coleta:
                   <br/>
-                  <strong style="font-size:15px; color:#007d32;">
+                  <strong style="font-size:15px; color:#C99A24;">
                     ${valor > 0 ? valor.toFixed(2) + "%" : "Sem dados"}
                   </strong>
                   <br/><br/>
@@ -144,23 +144,23 @@ export default function MapaColetaPapaNicolauUF({
           <span>Sem dados / Zero</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(192, 0, 0)" }}></span>
+          <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300" style={{ backgroundColor: "#FFF8E5" }}></span>
           <span>Muito Baixa (&lt; 15,0%)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(237, 125, 49)" }}></span>
+          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#FCEAB8" }}></span>
           <span>Baixa (15,0% - 18,0%)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(255, 192, 0)" }}></span>
+          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#F5D77F" }}></span>
           <span>Média (18,0% - 21,0%)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(0, 176, 80)" }}></span>
+          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#EAC04B" }}></span>
           <span>Alta (21,0% - 25,0%)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "rgb(0, 125, 50)" }}></span>
+          <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: "#C99A24" }}></span>
           <span>Muito Alta (&gt; 25,0%)</span>
         </div>
       </div>

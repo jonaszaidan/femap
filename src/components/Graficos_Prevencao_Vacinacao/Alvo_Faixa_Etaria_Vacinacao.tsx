@@ -35,13 +35,13 @@ export default function Alvo_Faixa_Etaria_Vacinacao({
         <div className="flex items-center gap-4 text-xs font-semibold">
           {(sexoFiltro === "geral" || sexoFiltro === "feminino") && (
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-[#D8B4FE]" />
+              <span className="w-3 h-3 rounded-full bg-[#C34F83]" />
               <span className="text-slate-600">Feminino</span>
             </div>
           )}
           {(sexoFiltro === "geral" || sexoFiltro === "masculino") && (
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-[#818CF8]" />
+              <span className="w-3 h-3 rounded-full bg-[#789ACB]" />
               <span className="text-slate-600">Masculino</span>
             </div>
           )}
@@ -81,7 +81,7 @@ export default function Alvo_Faixa_Etaria_Vacinacao({
                     {/* Exibe o segmento feminino se for Geral ou Feminino */}
                     {(sexoFiltro === "geral" || sexoFiltro === "feminino") && (
                       <div
-                        className="bg-[#D8B4FE] h-full transition-all duration-500"
+                        className="bg-[#E47FAE] h-full transition-all duration-500"
                         style={{ width: sexoFiltro === "feminino" ? "100%" : `${pctFem}%` }}
                         title={`Feminino: ${fem.toLocaleString("pt-BR")}`}
                       />
@@ -89,7 +89,7 @@ export default function Alvo_Faixa_Etaria_Vacinacao({
                     {/* Exibe o segmento masculino se for Geral ou Masculino */}
                     {(sexoFiltro === "geral" || sexoFiltro === "masculino") && (
                       <div
-                        className="bg-[#818CF8] h-full transition-all duration-500"
+                        className="bg-[#789ACB] h-full transition-all duration-500"
                         style={{ width: sexoFiltro === "masculino" ? "100%" : `${pctMasc}%` }}
                         title={`Masculino: ${masc.toLocaleString("pt-BR")}`}
                       />
