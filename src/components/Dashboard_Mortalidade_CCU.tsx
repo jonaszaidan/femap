@@ -30,12 +30,21 @@ import { getHsilPorMunicipio } from "../services/queries_mortalidade/hsilMapasMu
 import { getTop10Hsil } from "../services/queries_mortalidade/hsilTabelaQueries";
 import { getTop10HsilMunicipios } from "../services/queries_mortalidade/hsilTabelaMunicipiosQueries";
 
-// 3. Query da Evolução
+// 3. Query de Incidência (tabela incidencia_uf)
+import { getIncidenciaPorEstado } from "../services/queries_mortalidade/incidencia_mapa_uf_queries";
+import { getTotalIncidenciaBrasil } from "../services/queries_mortalidade/incidenciaKpiQueries";
+
+// 4. Query da Evolução
 import { getEvolucaoMortalidadeHSIL } from "../services/queries_mortalidade/mortalidadeEvolucaoQueries";
 
 // Importações dinâmicas dos mapas e gráficos
 const MapaMortalidadeUF = dynamic(
   () => import("./Graficos_Mortalidade/MapaMortalidadeUF"),
+  { ssr: false }
+);
+
+const MapaIncidenciaUF = dynamic(
+  () => import("./Graficos_Mortalidade/MapaMortalidade_Incidencia_uf"),
   { ssr: false }
 );
 
@@ -66,20 +75,25 @@ const LISTA_UFS = [
   "RO", "RR", "RS", "SC", "SE", "SP", "TO",
 ];
 
-// Cards dos mapas: fundo, borda e título de cada um
-const COR_MORTALIDADE = "#004F4B"; // verdee
-const COR_INCIDENCIA = "#85264F"; // rosa
+// Cor do texto da taxa nas tabelas Top 10
+const COR_MORTALIDADE = "#004F4B"; // verde
+const COR_INCIDENCIA = "#85264F"; // framboesa
 const COR_HSIL = "#49305F"; // roxo escuro
 
-
-const COR_MORT_FUNDO = "#D2F0EE";  // verde claro (nível 1 da paleta)
-const COR_MORT_BORDA = "#7CCFC8";  // verde (nível 2)
+// Cards dos mapas: fundo, borda e título de cada um
+const COR_MORT_FUNDO = "#D2F0EE"; // verde claro (nível 1 da paleta)
+const COR_MORT_BORDA = "#7CCFC8"; // verde (nível 2)
 const COR_MORT_TITULO = "#004F4B"; // verde forte (nível 5)
 
-const COR_HSIL_FUNDO = "#F1EBF6";  // roxo claro (nível 1 da paleta)
-const COR_HSIL_BORDA = "#D7C4E5";  // roxo (nível 2)
+const COR_INC_FUNDO = "#FBE8F0"; // rosa claro (nível 1 da paleta)
+const COR_INC_BORDA = "#F2B8D0"; // rosa (nível 2)
+const COR_INC_TITULO = "#85264F"; // framboesa (nível 5)
+
+const COR_HSIL_FUNDO = "#F1EBF6"; // roxo claro (nível 1 da paleta)
+const COR_HSIL_BORDA = "#D7C4E5"; // roxo (nível 2)
 const COR_HSIL_TITULO = "#49305F"; // roxo escuro (nível 5)
-// InterfacesS
+
+// Interfaces
 interface DadosEstado {
   id?: number;
   estado?: string;
@@ -99,6 +113,13 @@ interface DadosUF {
   tx_hsil_uf?: number;
 }
 
+interface DadosIncidenciaUF {
+  uf: string;
+  estado: string;
+  ano: number;
+  incidencia: number;
+}
+
 export default function Dashboard() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
 
@@ -114,10 +135,12 @@ export default function Dashboard() {
   const [taxaBrasilHsil, setTaxaBrasilHsil] = useState<number | string>("0.00");
   const [totalResultadosHsil, setTotalResultadosHsil] = useState<number | string>(0);
   const [piorEstadoHsil, setPiorEstadoHsil] = useState<{ estado: string; taxa: number } | null>(null);
+  const [totalIncidencia, setTotalIncidencia] = useState<number | string>(0);
 
   // Dados por Estado (UF)
   const [mortalidadeEstadosAno, setMortalidadeEstadosAno] = useState<DadosEstado[]>([]);
   const [mortalidadeUFAno, setMortalidadeUFAno] = useState<DadosUF[]>([]);
+  const [incidenciaUFAno, setIncidenciaUFAno] = useState<DadosIncidenciaUF[]>([]);
   const [hsilUFAno, setHsilUFAno] = useState<DadosUF[]>([]);
   const [hsilTop10, setHsilTop10] = useState<any[]>([]);
 
@@ -158,10 +181,15 @@ export default function Dashboard() {
         setTaxaBrasilHsil(resumoHsil.taxaBrasil);
         setTotalResultadosHsil(resumoHsil.totalResultados);
         setPiorEstadoHsil(resumoHsil.piorEstado);
+        const totalInc = await getTotalIncidenciaBrasil(anoSelecionado);
+        setTotalIncidencia(totalInc);
 
         if (visao === "estado") {
           const dadosEstados = await getMortalidadePorEstado(anoSelecionado);
           setMortalidadeUFAno(dadosEstados);
+
+          const dadosIncidencia = await getIncidenciaPorEstado(anoSelecionado);
+          setIncidenciaUFAno(dadosIncidencia);
 
           const dadosHsilEstados = await getHsilPorEstado(anoSelecionado);
           setHsilUFAno(dadosHsilEstados);
@@ -213,7 +241,7 @@ export default function Dashboard() {
     carregarDadosDoAno();
   }, [anoSelecionado, visao, ufSelecionada]);
 
-  // Top 10 Estados
+  // Top 10 Estados - Mortalidade
   const top10Mortalidade = [...mortalidadeEstadosAno]
     .sort(
       (a, b) =>
@@ -222,7 +250,18 @@ export default function Dashboard() {
     )
     .slice(0, 10);
 
-  const top10Incidencia: any[] = [];
+  // Top 10 Estados - Incidência (formatado para a mesma tabela da mortalidade)
+  const top10Incidencia = [...incidenciaUFAno]
+    .sort((a, b) => Number(b.incidencia || 0) - Number(a.incidencia || 0))
+    .slice(0, 10)
+    .map((item) => ({
+      estado: item.estado || item.uf,
+      uf: item.uf,
+      taxa: item.incidencia,
+      tx_mortalidade: item.incidencia,
+      tx_mortalidade_ccu: item.incidencia,
+      ab_mortalidade: 0,
+    }));
 
   return (
     <>
@@ -262,6 +301,7 @@ export default function Dashboard() {
           taxaHsil={taxaBrasilHsil}
           totalResultadosHsil={totalResultadosHsil}
           piorEstadoHsil={piorEstadoHsil}
+          totalIncidencia={totalIncidencia}
         />
       </div>
 
@@ -354,55 +394,60 @@ export default function Dashboard() {
         {visao === "estado" ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Mapa 1 - Mortalidade Estado */}
-            
-              <div
-                className="p-4 rounded-3xl border shadow-sm"
-                style={{ backgroundColor: COR_MORT_FUNDO, borderColor: COR_MORT_BORDA }}
-              >
-                <h3 className="text-center font-bold mb-2" style={{ color: COR_MORT_TITULO }}>
-                  Mortalidade
-                </h3>
-                <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno} />
-              </div>
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_MORT_FUNDO, borderColor: COR_MORT_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_MORT_TITULO }}>
+                Mortalidade
+              </h3>
+              <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno} />
+            </div>
 
             {/* Mapa 2 - Incidência Estado */}
-            <div className="bg-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
-              <h3 className="text-center font-bold text-amber-900 mb-2">Incidência</h3>
-              <MapaMortalidadeUF mortalidadeUFAno={mortalidadeUFAno || []} />
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_INC_FUNDO, borderColor: COR_INC_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_INC_TITULO }}>
+                Incidência
+              </h3>
+              <MapaIncidenciaUF incidenciaUFAno={incidenciaUFAno} />
             </div>
 
             {/* Mapa 3 - HSIL Estado */}
-              <div
-                className="p-4 rounded-3xl border shadow-sm"
-                style={{ backgroundColor: COR_HSIL_FUNDO, borderColor: COR_HSIL_BORDA }}
-              >
-                <h3 className="text-center font-bold mb-2" style={{ color: COR_HSIL_TITULO }}>
-                  HSIL
-                </h3>
-                <MapaMortalidadeHsilUF hsilUFAno={hsilUFAno} />
-              </div>
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_HSIL_FUNDO, borderColor: COR_HSIL_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_HSIL_TITULO }}>
+                HSIL
+              </h3>
+              <MapaMortalidadeHsilUF hsilUFAno={hsilUFAno} />
+            </div>
           </div>
-          
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Mapa 1 - Mortalidade Municípios */}
-            
-              <div
-                className="p-4 rounded-3xl border shadow-sm"
-                style={{ backgroundColor: COR_MORT_FUNDO, borderColor: COR_MORT_BORDA }}
-              >
-                <h3 className="text-center font-bold mb-2" style={{ color: COR_MORT_TITULO }}>
-                  Mortalidade Municipal ({ufSelecionada})
-                </h3>
-                <MapaMortalidadeMunicipios
-                  mortalidadeMunicipiosAno={mortalidadeMunicipiosAno}
-                  codigoUfIbge={UF_PARA_CODIGO_IBGE[ufSelecionada as keyof typeof UF_PARA_CODIGO_IBGE]}
-                />
-              </div>
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_MORT_FUNDO, borderColor: COR_MORT_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_MORT_TITULO }}>
+                Mortalidade Municipal ({ufSelecionada})
+              </h3>
+              <MapaMortalidadeMunicipios
+                mortalidadeMunicipiosAno={mortalidadeMunicipiosAno}
+                codigoUfIbge={UF_PARA_CODIGO_IBGE[ufSelecionada as keyof typeof UF_PARA_CODIGO_IBGE]}
+              />
+            </div>
 
-            {/* Mapa 2 - Incidência Municípios */}
-            <div className="bg-orange-50/50 p-4 rounded-3xl border border-orange-100 shadow-sm">
-              <h3 className="text-center font-bold text-amber-900 mb-2">
+            {/* Mapa 2 - Incidência Municípios (ainda sem dados municipais) */}
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_INC_FUNDO, borderColor: COR_INC_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_INC_TITULO }}>
                 Incidência Municipal ({ufSelecionada})
               </h3>
               <MapaMortalidadeMunicipios
@@ -412,19 +457,18 @@ export default function Dashboard() {
             </div>
 
             {/* Mapa 3 - HSIL Municípios */}
-            
-              <div
-                className="p-4 rounded-3xl border shadow-sm"
-                style={{ backgroundColor: COR_HSIL_FUNDO, borderColor: COR_HSIL_BORDA }}
-              >
-                <h3 className="text-center font-bold mb-2" style={{ color: COR_HSIL_TITULO }}>
-                  HSIL Municipal ({ufSelecionada})
-                </h3>
-                <MapaMortalidadeHsilMunicipios
-                  hsilMunicipiosAno={hsilMunicipiosAno}
-                  codigoUfIbge={UF_PARA_CODIGO_IBGE[ufSelecionada as keyof typeof UF_PARA_CODIGO_IBGE]}
-                />
-              </div>
+            <div
+              className="p-4 rounded-3xl border shadow-sm"
+              style={{ backgroundColor: COR_HSIL_FUNDO, borderColor: COR_HSIL_BORDA }}
+            >
+              <h3 className="text-center font-bold mb-2" style={{ color: COR_HSIL_TITULO }}>
+                HSIL Municipal ({ufSelecionada})
+              </h3>
+              <MapaMortalidadeHsilMunicipios
+                hsilMunicipiosAno={hsilMunicipiosAno}
+                codigoUfIbge={UF_PARA_CODIGO_IBGE[ufSelecionada as keyof typeof UF_PARA_CODIGO_IBGE]}
+              />
+            </div>
           </div>
         )}
       </div>
@@ -447,7 +491,7 @@ export default function Dashboard() {
           <TabelaTop10EstadosHsil
             titulo="Top 10 Estados - Maior HSIL"
             dados={hsilTop10}
-           corTextoTaxa={COR_HSIL}
+            corTextoTaxa={COR_HSIL}
           />
         </div>
       ) : (
@@ -455,7 +499,7 @@ export default function Dashboard() {
           <TabelaMortalidadeMunicipios
             titulo={`Top 10 Municípios - Maior Mortalidade (${ufSelecionada})`}
             dados={top10MortalidadeMun}
-             corTextoTaxa={COR_MORTALIDADE}
+            corTextoTaxa={COR_MORTALIDADE}
           />
 
           <TabelaMortalidadeMunicipios

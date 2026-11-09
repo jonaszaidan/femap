@@ -11,6 +11,9 @@ interface KpiCardsProps {
   totalObitos: string | number;
   piorEstadoMortalidade: PiorEstado | null;
 
+  // Incidência
+  totalIncidencia: string | number;
+
   // HSIL
   taxaHsil: string | number;
   totalResultadosHsil: string | number;
@@ -25,13 +28,14 @@ const formatarInteiro = (valor: number | string) => {
   }).format(numero);
 };
 
-export default function KpiCards({ 
-  taxaMortalidadeCCU, 
-  totalObitos, 
+export default function KpiCards({
+  taxaMortalidadeCCU,
+  totalObitos,
   piorEstadoMortalidade,
+  totalIncidencia,
   taxaHsil,
   totalResultadosHsil,
-  piorEstadoHsil
+  piorEstadoHsil,
 }: KpiCardsProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -71,8 +75,8 @@ export default function KpiCards({
         </div>
       </div>
 
-      {/* 2. Incidência */}
-      <div className="bg-orange-100/70 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900">
+      {/* 2. Incidência (total de casos dinâmico; taxa e estado ainda fixos) */}
+      <div className="bg-[#F2B8D0]/70 rounded-3xl p-5 shadow-sm flex flex-col justify-between text-center text-gray-900">
         <h2 className="text-xl font-extrabold mb-4">Incidência</h2>
         <div className="grid grid-cols-3 gap-2 w-full items-end">
           <div className="flex flex-col items-center">
@@ -86,7 +90,7 @@ export default function KpiCards({
 
           <div className="flex flex-col items-center">
             <p className="text-2xl xl:text-3xl font-extrabold leading-none">
-              17.000
+              {formatarInteiro(totalIncidencia)}
             </p>
             <p className="text-[11px] font-semibold text-gray-700 mt-2 leading-tight">
               casos
