@@ -6,10 +6,12 @@ import { useState, useEffect } from "react";
 // Tabelas Estaduais
 import TabelaTop10EstadosHsil from "./Graficos_Mortalidade/TabelaHsilUF";
 import TabelaTop10EstadosMortalidade from "./Graficos_Mortalidade/TabelaMortalidadeUF";
+import TabelaIncidenciaUF from "./Graficos_Mortalidade/TabelaIncidenciaUF";
 
 // Tabelas Municipais
 import TabelaMortalidadeMunicipios from "./Graficos_Mortalidade/TabelaMortalidadeMunicipios";
 import TabelaHsilMunicipios from "./Graficos_Mortalidade/TabelaHsilMunicipios";
+import TabelaIncidenciaMunicipios from "./Graficos_Mortalidade/TabelaIncidenciaMunicipios";
 
 import KpiCards from "./Graficos_Mortalidade/KpiCards";
 
@@ -30,9 +32,12 @@ import { getHsilPorMunicipio } from "../services/queries_mortalidade/hsilMapasMu
 import { getTop10Hsil } from "../services/queries_mortalidade/hsilTabelaQueries";
 import { getTop10HsilMunicipios } from "../services/queries_mortalidade/hsilTabelaMunicipiosQueries";
 
-// 3. Query de Incidência (tabela incidencia_uf)
+// 3. Queries de Incidência (tabelas incidencia_uf e incidencia_municipios)
 import { getIncidenciaPorEstado } from "../services/queries_mortalidade/incidencia_mapa_uf_queries";
+import { getIncidenciaPorMunicipio } from "../services/queries_mortalidade/incidenciaMapasMunicipiosQueries";
 import { getTotalIncidenciaBrasil } from "../services/queries_mortalidade/incidenciaKpiQueries";
+import { getTop10Incidencia } from "../services/queries_mortalidade/incidenciaTabelaUFQueries";
+import { getTop10IncidenciaMunicipios } from "../services/queries_mortalidade/incidenciaTabelaMunicipiosQueries";
 
 // 4. Query da Evolução
 import { getEvolucaoMortalidadeHSIL } from "../services/queries_mortalidade/mortalidadeEvolucaoQueries";
@@ -45,6 +50,11 @@ const MapaMortalidadeUF = dynamic(
 
 const MapaIncidenciaUF = dynamic(
   () => import("./Graficos_Mortalidade/MapaMortalidade_Incidencia_uf"),
+  { ssr: false }
+);
+
+const MapaIncidenciaMunicipios = dynamic(
+  () => import("./Graficos_Mortalidade/MapaMortalidade_Incidencia_Municipios"),
   { ssr: false }
 );
 
@@ -120,6 +130,13 @@ interface DadosIncidenciaUF {
   incidencia: number;
 }
 
+interface DadosIncidenciaMunicipio {
+  codigo_ibge: string;
+  cidade: string;
+  ano: number;
+  incidencia: number;
+}
+
 export default function Dashboard() {
   const [anoSelecionado, setAnoSelecionado] = useState<number>(2024);
 
@@ -135,19 +152,23 @@ export default function Dashboard() {
   const [taxaBrasilHsil, setTaxaBrasilHsil] = useState<number | string>("0.00");
   const [totalResultadosHsil, setTotalResultadosHsil] = useState<number | string>(0);
   const [piorEstadoHsil, setPiorEstadoHsil] = useState<{ estado: string; taxa: number } | null>(null);
+
   const [totalIncidencia, setTotalIncidencia] = useState<number | string>(0);
 
   // Dados por Estado (UF)
   const [mortalidadeEstadosAno, setMortalidadeEstadosAno] = useState<DadosEstado[]>([]);
   const [mortalidadeUFAno, setMortalidadeUFAno] = useState<DadosUF[]>([]);
   const [incidenciaUFAno, setIncidenciaUFAno] = useState<DadosIncidenciaUF[]>([]);
+  const [incidenciaTop10, setIncidenciaTop10] = useState<DadosIncidenciaUF[]>([]);
   const [hsilUFAno, setHsilUFAno] = useState<DadosUF[]>([]);
   const [hsilTop10, setHsilTop10] = useState<any[]>([]);
 
   // Dados por Município
   const [mortalidadeMunicipiosAno, setMortalidadeMunicipiosAno] = useState<any[]>([]);
   const [hsilMunicipiosAno, setHsilMunicipiosAno] = useState<any[]>([]);
+  const [incidenciaMunicipiosAno, setIncidenciaMunicipiosAno] = useState<DadosIncidenciaMunicipio[]>([]);
   const [top10MortalidadeMun, setTop10MortalidadeMun] = useState<any[]>([]);
+  const [top10IncidenciaMun, setTop10IncidenciaMun] = useState<DadosIncidenciaMunicipio[]>([]);
   const [top10HsilMun, setTop10HsilMun] = useState<any[]>([]);
 
   const [dadosEvolucao, setDadosEvolucao] = useState<any[]>([]);
@@ -181,6 +202,7 @@ export default function Dashboard() {
         setTaxaBrasilHsil(resumoHsil.taxaBrasil);
         setTotalResultadosHsil(resumoHsil.totalResultados);
         setPiorEstadoHsil(resumoHsil.piorEstado);
+
         const totalInc = await getTotalIncidenciaBrasil(anoSelecionado);
         setTotalIncidencia(totalInc);
 
@@ -190,6 +212,9 @@ export default function Dashboard() {
 
           const dadosIncidencia = await getIncidenciaPorEstado(anoSelecionado);
           setIncidenciaUFAno(dadosIncidencia);
+
+          const dadosTop10Incidencia = await getTop10Incidencia(anoSelecionado);
+          setIncidenciaTop10(dadosTop10Incidencia);
 
           const dadosHsilEstados = await getHsilPorEstado(anoSelecionado);
           setHsilUFAno(dadosHsilEstados);
@@ -217,18 +242,24 @@ export default function Dashboard() {
           const [
             dadosMunicipais,
             dadosHsilMunicipais,
+            dadosIncidenciaMun,
             top10MortMunData,
+            top10IncidenciaMunData,
             top10HsilMunData,
           ] = await Promise.all([
             getMortalidadePorMunicipio(anoSelecionado, codigoIbgeUf),
             getHsilPorMunicipio(anoSelecionado, codigoIbgeUf),
+            getIncidenciaPorMunicipio(anoSelecionado, codigoIbgeUf),
             getTop10MortalidadeMunicipios(anoSelecionado, codigoIbgeUf),
+            getTop10IncidenciaMunicipios(anoSelecionado, codigoIbgeUf),
             getTop10HsilMunicipios(anoSelecionado, codigoIbgeUf),
           ]);
 
           setMortalidadeMunicipiosAno(dadosMunicipais);
           setHsilMunicipiosAno(dadosHsilMunicipais);
+          setIncidenciaMunicipiosAno(dadosIncidenciaMun);
           setTop10MortalidadeMun(top10MortMunData);
+          setTop10IncidenciaMun(top10IncidenciaMunData);
           setTop10HsilMun(top10HsilMunData);
         }
       } catch (error) {
@@ -249,19 +280,6 @@ export default function Dashboard() {
         Number(a.taxa || a.tx_mortalidade || 0)
     )
     .slice(0, 10);
-
-  // Top 10 Estados - Incidência (formatado para a mesma tabela da mortalidade)
-  const top10Incidencia = [...incidenciaUFAno]
-    .sort((a, b) => Number(b.incidencia || 0) - Number(a.incidencia || 0))
-    .slice(0, 10)
-    .map((item) => ({
-      estado: item.estado || item.uf,
-      uf: item.uf,
-      taxa: item.incidencia,
-      tx_mortalidade: item.incidencia,
-      tx_mortalidade_ccu: item.incidencia,
-      ab_mortalidade: 0,
-    }));
 
   return (
     <>
@@ -298,10 +316,10 @@ export default function Dashboard() {
           taxaMortalidadeCCU={taxaBrasilMortalidade}
           totalObitos={totalObitos}
           piorEstadoMortalidade={piorEstadoMortalidade}
+          totalIncidencia={totalIncidencia}
           taxaHsil={taxaBrasilHsil}
           totalResultadosHsil={totalResultadosHsil}
           piorEstadoHsil={piorEstadoHsil}
-          totalIncidencia={totalIncidencia}
         />
       </div>
 
@@ -442,7 +460,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Mapa 2 - Incidência Municípios (ainda sem dados municipais) */}
+            {/* Mapa 2 - Incidência Municípios */}
             <div
               className="p-4 rounded-3xl border shadow-sm"
               style={{ backgroundColor: COR_INC_FUNDO, borderColor: COR_INC_BORDA }}
@@ -450,8 +468,8 @@ export default function Dashboard() {
               <h3 className="text-center font-bold mb-2" style={{ color: COR_INC_TITULO }}>
                 Incidência Municipal ({ufSelecionada})
               </h3>
-              <MapaMortalidadeMunicipios
-                mortalidadeMunicipiosAno={[]}
+              <MapaIncidenciaMunicipios
+                incidenciaMunicipiosAno={incidenciaMunicipiosAno}
                 codigoUfIbge={UF_PARA_CODIGO_IBGE[ufSelecionada as keyof typeof UF_PARA_CODIGO_IBGE]}
               />
             </div>
@@ -482,9 +500,9 @@ export default function Dashboard() {
             corTextoTaxa={COR_MORTALIDADE}
           />
 
-          <TabelaTop10EstadosMortalidade
+          <TabelaIncidenciaUF
             titulo="Top 10 Estados - Maior Incidência"
-            dados={top10Incidencia}
+            dados={incidenciaTop10}
             corTextoTaxa={COR_INCIDENCIA}
           />
 
@@ -502,9 +520,9 @@ export default function Dashboard() {
             corTextoTaxa={COR_MORTALIDADE}
           />
 
-          <TabelaMortalidadeMunicipios
+          <TabelaIncidenciaMunicipios
             titulo={`Top 10 Municípios - Maior Incidência (${ufSelecionada})`}
-            dados={[]}
+            dados={top10IncidenciaMun}
             corTextoTaxa={COR_INCIDENCIA}
           />
 
